@@ -1,0 +1,92 @@
+{
+    "name": "linecount",
+    "displayName": "LineCount",
+    "description": "Count the lines of code.",
+    "version": "0.0.1",
+    "publisher": "yycalm",
+    "engines": {
+        "vscode": "^1.5.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "*",
+        "onCommand:extension.linecount.currentfile",
+        "onCommand:extension.linecount.workspace"
+    ],
+    "main": "./out/src/extension",
+    "contributes": {
+        "commands": [{
+            "command": "extension.linecount.currentfile",
+            "title": "LineCount: Count current file."        
+        },{
+            "command": "extension.linecount.workspace",
+            "title": "LineCount: Count Workspace files."
+        }],
+        "configuration": {
+            "type": "object",
+            "title": "LineCount configuration",
+            "properties": {
+                "LineCount.includes": {
+                    "type": "array",
+                    "default": ["**/*"],
+                    "description": "A glob pattern that defines the files to search for."
+                },
+                "LineCount.excludes": {
+                    "type": "array",
+                    "default": ["**/.vscode/**","**/node_modules/**"],
+                    "description": "A glob pattern that defines files and folders to exclude."
+                },
+                "LineCount.comment": {
+                    "type": "array",
+                    "default": [
+                        {
+                            "ext":["c"],
+                            "separator":{"linecomment":"//","blockstart":"/*","blockend":"*/","linestart":false,"continuationmark":"\\"}
+                        },
+                        {
+                            "ext":["sql"],
+                            "separator":{"linecomment":"--","blockstart":"/*","blockend":"*/"}
+                        },
+                       {
+                            "ext":["rb"],
+                            "separator":{"linecomment":"#","blockstart":"=begin","blockend":"=end","linestart":true}
+                        },
+                        {
+                            "ext":["bat"],
+                            "separator":{"linecomment":"rem "}
+                        },
+                        {
+                            "ext":["html","xml"],
+                            "separator":{"blockstart":"<!--","blockend":"-->"}
+                        }
+                    ],
+                     "description": "Define a document's comment."
+               },
+                "LineCount.output": {
+                    "type": "object",
+                    "default": {
+                        "txt":true,
+                        "json":true                        
+                        },
+                    "description": "Type of output file."
+                }
+               
+            }
+        }
+    },
+    "scripts": {
+        "vscode:prepublish": "tsc -p ./",
+        "compile": "tsc -watch -p ./",
+        "postinstall": "node ./node_modules/vscode/bin/install",
+        "test": "node ./node_modules/vscode/bin/test"
+    },
+    "devDependencies": {
+        "typescript": "^2.0.3",
+        "vscode": "^1.0.0",
+        "mocha": "^2.3.3",
+        "@types/node": "^6.0.40",
+        "@types/mocha": "^2.2.32"
+    }
+}
