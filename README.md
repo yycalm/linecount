@@ -1,6 +1,13 @@
 # LineCount README
 
 LineCount 是一个vscode(visual studio code )下的插件，用来统计代码行数。使用TypeScript语言编写。
+
+[![Version](https://vsmarketplacebadge.apphb.com/version/linecount.svg)](https://marketplace.visualstudio.com/items?itemName=linecount)
+
+[![Installs](https://vsmarketplacebadge.apphb.com/installs/linecount.svg)](https://marketplace.visualstudio.com/items?itemName=linecount)
+
+[![Ratings](https://vsmarketplacebadge.apphb.com/rating/linecount.svg)](https://marketplace.visualstudio.com/items?itemName=linecount)
+
 ---
 
 ## 功能
@@ -95,21 +102,28 @@ LineCount configuration：
 1.统计当前文档行数：
 按F1，输入LineCount，选择LineCount: Count current file，即可在输出窗口输出：
 
+![Count current file](https://github.com/yycalm/linecount/tree/master/images/countfile.png)
+
+![output result](https://github.com/yycalm/linecount/tree/master/images/countfile_out.png)
+
+
 2.统计工作区文档行数：
 按F1，输入LineCount，选择LineCount: Count Workspace files,
 统计完毕后，在输出窗口输出文件总数，代码总数，注释总数，空白行总数。
 每个文件的代码行数信息输出到指定路径的linecount.txt或linecount.json文档中。
 
+![Count workspace files output to txt file](https://github.com/yycalm/linecount/tree/master/images/countworkspace_outtxt.png)
+
+![Count workspace files output to json file](https://github.com/yycalm/linecount/tree/master/images/countworkspace_outjson.png)
 
 ## 更多信息
 
 [联系或更多信息，访问Repository](https://github.com/yycalm/linecount)
 
-### 0.1.0
 
-发布
+# License
+MIT
 
 -----------------------------------------------------------------------------------------------------------
-yycalm 2017
 
 **Enjoy!**
