@@ -13,9 +13,13 @@ LineCount 是一个vscode(visual studio code )下的插件，用来统计代码�
 ## 功能
 
 1.可以统计当前文档的代码行数，注释行数和空行数。
+
 2.可以统计当前工作区指定类型文件的代码行数，注释行数和空行数。
+
 3.内置十几种语言支持，如常见的c,cpp,java,jsp,sql,css,html,python等。
+
 4.可以自定义语言注释符号，新增未知语言支持。
+
 5.统计行数信息可以输出到txt和json文档，以累加方式输出，便于日后查看统计。
 
 ## 安装
@@ -100,21 +104,25 @@ LineCount configuration：
 ## 使用
 
 1.统计当前文档行数：
+
 按F1，输入LineCount，选择LineCount: Count current file，即可在输出窗口输出：
 
-![Count current file](https://github.com/yycalm/linecount/tree/master/images/countfile.png)
+![Count current file](https://github.com/yycalm/linecount/blob/master/images/countfile.png)
 
-![output result](https://github.com/yycalm/linecount/tree/master/images/countfile_out.png)
+![output result](https://github.com/yycalm/linecount/blob/master/images/countfile_out.png)
 
 
 2.统计工作区文档行数：
+
 按F1，输入LineCount，选择LineCount: Count Workspace files,
+
 统计完毕后，在输出窗口输出文件总数，代码总数，注释总数，空白行总数。
+
 每个文件的代码行数信息输出到指定路径的linecount.txt或linecount.json文档中。
 
-![Count workspace files output to txt file](https://github.com/yycalm/linecount/tree/master/images/countworkspace_outtxt.png)
+![Count workspace files output to txt file](https://github.com/yycalm/linecount/blob/master/images/countworkspace_outtxt.png)
 
-![Count workspace files output to json file](https://github.com/yycalm/linecount/tree/master/images/countworkspace_outjson.png)
+![Count workspace files output to json file](https://github.com/yycalm/linecount/blob/master/images/countworkspace_outjson.png)
 
 ## 更多信息
 
