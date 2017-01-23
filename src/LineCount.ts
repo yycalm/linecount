@@ -26,17 +26,20 @@ export default class LineCount {
         this.filelist = new Array();
         this.commentRule = new Array();
         this.configRule = new Array();
+        
         this.EXTENSION_NAME = 'linecount';
+        this.EXTENSION_VERSION = '0.1.0';
         console.log('vscode extensions num is '+vscode.extensions.all.length);
         for(var i=0; i<vscode.extensions.all.length; i++){
             let ext = vscode.extensions.all[i];
-            if(!ext.packageJSON.isBuiltin){
-                if(path.normalize(ext.extensionPath)==path.normalize(context.extensionPath)){
-                   this.EXTENSION_NAME = ext.packageJSON.name;
-                   this.EXTENSION_VERSION = ext.packageJSON.version;           
-                    break;                    
-                }
-            }
+            if(ext.id=='yycalm.linecount'){
+            // if(!ext.packageJSON.isBuiltin){
+            //     if(path.normalize(ext.extensionPath)==path.normalize(context.extensionPath)){
+                    this.EXTENSION_NAME = ext.packageJSON.name;
+                    this.EXTENSION_VERSION = ext.packageJSON.version;           
+                     break;                    
+            //     }
+             }
         }
         // let fname = path.join(context.extensionPath,"package.json");
         // let data = fs.readFileSync(fname,"utf8");  
