@@ -11,6 +11,8 @@ export default class LineCount {
     private encoding:string;
     private includes:string;
     private excludes:string;
+    private outdir:string;
+    private outpath:string;    
     private outtype:any;
     private filelist:Array<Object>;
     private commentRule:Array<Object>;
@@ -24,18 +26,30 @@ export default class LineCount {
         this.filelist = new Array();
         this.commentRule = new Array();
         this.configRule = new Array();
-        let fname = path.join(context.extensionPath,"package.json");
-        // let data = fs.readFileSync(fname,"utf8");  
-        fs.readFile(fname,"utf8",(err,data)=>{
-            if(err){
-                this.EXTENSION_NAME = "LineCount";
-                this.EXTENSION_VERSION = "0.0.1";                       
-            }else{
-                let pkg = JSON.parse(data);
-                this.EXTENSION_NAME = pkg.name;
-                this.EXTENSION_VERSION = pkg.version;           
+        this.EXTENSION_NAME = 'linecount';
+        console.log('vscode extensions num is '+vscode.extensions.all.length);
+        for(var i=0; i<vscode.extensions.all.length; i++){
+            let ext = vscode.extensions.all[i];
+            if(!ext.packageJSON.isBuiltin){
+                if(path.normalize(ext.extensionPath)==path.normalize(context.extensionPath)){
+                   this.EXTENSION_NAME = ext.packageJSON.name;
+                   this.EXTENSION_VERSION = ext.packageJSON.version;           
+                    break;                    
+                }
             }
-        });       
+        }
+        // let fname = path.join(context.extensionPath,"package.json");
+        // let data = fs.readFileSync(fname,"utf8");  
+        // fs.readFile(fname,"utf8",(err,data)=>{
+        //     if(err){
+        //         this.EXTENSION_NAME = "LineCount";
+        //         this.EXTENSION_VERSION = "0.0.1";                       
+        //     }else{
+        //         let pkg = JSON.parse(data);
+        //         this.EXTENSION_NAME = pkg.name;
+        //         this.EXTENSION_VERSION = pkg.version;           
+        //     }
+        // });       
 
         this.commentRule.length = 0;
         this.commentRule['c']={"linecomment":"//","blockstart":"/*","blockend":"*/","continuationmark":"\\"};
@@ -68,7 +82,7 @@ export default class LineCount {
             this.out = vscode.window.createOutputChannel(this.EXTENSION_NAME);
         }
 
-        console.log("init start");
+        console.log("getConfiguration start");
         let conf = vscode.workspace.getConfiguration("LineCount");
         this.eol =  conf.get("eol","\r\n");
         this.encoding =  conf.get("encoding","utf8");
@@ -83,8 +97,12 @@ export default class LineCount {
         console.log(this.includes);
         console.log(this.excludes);
 
-        this.outtype = conf.get("output",{"txt":true,"json":false,"csv":false});
+        this.outtype = conf.get("output",{"txt":true,"json":false,"outdir":"out"});
+        this.outdir = conf.get("outdir","out").toString();
+        this.outpath =path.join(vscode.workspace.rootPath, this.outdir);       
         console.log(this.outtype);
+        console.log(this.outdir);
+        console.log(this.outpath);
        
         this.configRule.length = 0; 
         let comment = conf.get('comment');
@@ -92,7 +110,7 @@ export default class LineCount {
             if (comment.hasOwnProperty(key)) {
                 var element = comment[key];
                 var extlist = element['ext'];
-                console.log(extlist.toString());
+                //console.log(extlist.toString());
              
                 for (var ext in extlist) {
                     if (extlist.hasOwnProperty(ext)) {
@@ -237,7 +255,7 @@ export default class LineCount {
       
     private getRule(filename:string):any{
         let ext = path.extname(filename).replace('.',"");
-        console.log(ext);
+        //console.log(ext);
         if(this.configRule.hasOwnProperty(ext)){
             return this.configRule[ext];
         }else
@@ -259,7 +277,8 @@ export default class LineCount {
          // Get the current text editor
         let editor = vscode.window.activeTextEditor;
         if (!editor) {
-            this.out.appendLine('The current file does not exist!');
+            //this.out.appendLine('The current file does not exist!');
+            vscode.window.showInformationMessage('No file open!');
             return;
         }
 
@@ -279,8 +298,12 @@ export default class LineCount {
     }
 
     public countWorkspace() { 
-        
-       this.init();
+        if(!vscode.workspace.rootPath){
+             vscode.window.showInformationMessage('No workspace open!');
+             return;
+        }
+
+        this.init();
 
         let dir = path.join(vscode.workspace.rootPath, path.sep);
 
@@ -323,6 +346,10 @@ export default class LineCount {
         this.out.appendLine("   total comment lines : "+total['comment']);
         this.out.appendLine("   total blank lines : "+total['blank']);
 
+        if(!fs.existsSync(this.outpath)){
+            fs.mkdirSync(this.outpath);
+        }
+
         if(this.outtype.txt){
             this.out_txt(total);
         }
@@ -336,7 +363,7 @@ export default class LineCount {
     }
 
     private out_txt(total:any){
-        let filename = path.join(vscode.workspace.rootPath,this.EXTENSION_NAME+'.txt');
+        let filename = path.join(this.outpath, this.EXTENSION_NAME+'.txt');
         if(!fs.existsSync(filename)){
             let fd = fs.openSync(filename, 'w');
             //fs.closeSync(fd);
@@ -371,8 +398,8 @@ export default class LineCount {
                     edit.insert(new vscode.Position(line++, 0), sepline+this.eol);
                 });
                 e.document.save();
-                console.log("startline:"+startline.toString());
-                console.log("lineCount:"+line.toString());
+               // console.log("startline:"+startline.toString());
+                //console.log("lineCount:"+line.toString());
                 e.revealRange(new vscode.Range(startline, 0, startline+line, 0));
 
                 this.out.appendLine("count output to file : "+filename);
@@ -383,7 +410,7 @@ export default class LineCount {
     }
 
     private out_json(total:any){
-        let filename = path.join(vscode.workspace.rootPath,this.EXTENSION_NAME+'.json');
+        let filename = path.join(this.outpath,this.EXTENSION_NAME+'.json');
         let obj:any;
         if(fs.existsSync(filename)){
             let json = fs.readFileSync(filename, this.encoding);
@@ -457,7 +484,7 @@ export default class LineCount {
     }
 
     private out_csv(total:any){
-        let filename = path.join(vscode.workspace.rootPath,this.EXTENSION_NAME+'.csv');
+        let filename = path.join(this.outpath,this.EXTENSION_NAME+'.csv');
  
         if(!fs.existsSync(filename)){
             //let fd = fs.openSync(filename, 'w');

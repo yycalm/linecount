@@ -2,14 +2,40 @@
     "name": "linecount",
     "displayName": "LineCount",
     "description": "Count the lines of code.",
-    "version": "0.0.1",
+    "version": "0.1.0",
     "publisher": "yycalm",
+    "icon": "images/counticon.png",
+    "author": {
+		"name": "yycalm",
+		"url": "https://github.com/yycalm",
+		"email": "yycalm@qq.com"
+	},
+    "license": "SEE LICENSE IN LICENSE.md",
+    "bugs": {
+        "url": "https://github.com/yycalm/linecount/issues", 
+		"email": "yycalm@qq.com"		
+   },
+    "homepage": "https://github.com/yycalm/linecount",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/yycalm/linecount.git"
+    },
+	"keywords": [
+		"linecount",
+		"line",
+		"count",
+		"code",
+		"codeline",
+        "codecount"
+    ],
+    
     "engines": {
         "vscode": "^1.5.0"
     },
     "categories": [
-        "Other"
+        "Other","Languages"
     ],
+
     "activationEvents": [
         "*",
         "onCommand:extension.linecount.currentfile",
@@ -17,62 +43,83 @@
     ],
     "main": "./out/src/extension",
     "contributes": {
-        "commands": [{
-            "command": "extension.linecount.currentfile",
-            "title": "LineCount: Count current file."        
-        },{
-            "command": "extension.linecount.workspace",
-            "title": "LineCount: Count Workspace files."
-        }],
+        "commands": [
+            {
+                "command": "extension.linecount.currentfile",
+                "title": "LineCount: Count current file"
+            },
+            {
+                "command": "extension.linecount.workspace",
+                "title": "LineCount: Count Workspace files"
+            }
+        ],
         "configuration": {
             "type": "object",
             "title": "LineCount configuration",
             "properties": {
                 "LineCount.includes": {
                     "type": "array",
-                    "default": ["**/*"],
+                    "default": [
+                        "**/*"
+                    ],
                     "description": "A glob pattern that defines the files to search for."
                 },
                 "LineCount.excludes": {
                     "type": "array",
-                    "default": ["**/.vscode/**","**/node_modules/**"],
+                    "default": [
+                        "**/.vscode/**",
+                        "**/node_modules/**"
+                    ],
                     "description": "A glob pattern that defines files and folders to exclude."
                 },
                 "LineCount.comment": {
                     "type": "array",
                     "default": [
                         {
-                            "ext":["c"],
-                            "separator":{"linecomment":"//","blockstart":"/*","blockend":"*/","linestart":false,"continuationmark":"\\"}
+                            "ext": [
+                                "c"
+                            ],
+                            "separator": {
+                                "linecomment": "//",
+                                "blockstart": "/*",
+                                "blockend": "*/",
+                                "linestart": false,
+                                "continuationmark": "\\"
+                            }
                         },
                         {
-                            "ext":["sql"],
-                            "separator":{"linecomment":"--","blockstart":"/*","blockend":"*/"}
-                        },
-                       {
-                            "ext":["rb"],
-                            "separator":{"linecomment":"#","blockstart":"=begin","blockend":"=end","linestart":true}
+                            "ext": [
+                                "rb"
+                            ],
+                            "separator": {
+                                "linecomment": "#",
+                                "blockstart": "=begin",
+                                "blockend": "=end",
+                                "linestart": true
+                            }
                         },
                         {
-                            "ext":["bat"],
-                            "separator":{"linecomment":"rem "}
-                        },
-                        {
-                            "ext":["html","xml"],
-                            "separator":{"blockstart":"<!--","blockend":"-->"}
+                            "ext": [
+                                "html",
+                                "xml"
+                            ],
+                            "separator": {
+                                "blockstart": "<!--",
+                                "blockend": "-->"
+                            }
                         }
                     ],
-                     "description": "Define a document's comment."
-               },
+                    "description": "Define a document's comment."
+                },
                 "LineCount.output": {
                     "type": "object",
                     "default": {
-                        "txt":true,
-                        "json":true                        
-                        },
+                        "txt": true,
+                        "json": true,
+                        "outdir":"out"
+                    },
                     "description": "Type of output file."
                 }
-               
             }
         }
     },
@@ -84,7 +131,7 @@
     },
     "devDependencies": {
         "typescript": "^2.0.3",
-        "vscode": "^1.0.0",
+        "vscode": "^1.0.0",        
         "mocha": "^2.3.3",
         "@types/node": "^6.0.40",
         "@types/mocha": "^2.2.32"

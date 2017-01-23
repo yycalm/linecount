@@ -1,65 +1,115 @@
-# linecount README
+# LineCount README
 
-This is the README for your extension "linecount". After writing up a brief description, we recommend including the following sections.
+LineCount 是一个vscode(visual studio code )下的插件，用来统计代码行数。使用TypeScript语言编写。
+---
 
-## Features
+## 功能
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+1.可以统计当前文档的代码行数，注释行数和空行数。
+2.可以统计当前工作区指定类型文件的代码行数，注释行数和空行数。
+3.内置十几种语言支持，如常见的c,cpp,java,jsp,sql,css,html,python等。
+4.可以自定义语言注释符号，新增未知语言支持。
+5.统计行数信息可以输出到txt和json文档，以累加方式输出，便于日后查看统计。
 
-For example if there is an image subfolder under your extension project workspace:
+## 安装
 
-\!\[feature X\]\(images/feature-x.png\)
+1.在vscode中按F1，输入ext install linecount安装。
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+2.在vscode扩展应用商店中搜索linecount安装。
 
-## Requirements
+3.通过源码安装：
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+```
+git clone https://github.com/yycalm/linecount.git
+cd linecount
+npm install
+code .
+```
 
-## Extension Settings
+## 配置
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+LineCount configuration：
+```
+    //统计工作区包含的文件
+    "LineCount.includes": [     
+                        "**/*" 
+                        ]         
+    
+    //统计工作区排除的文件夹和文件                 
+    "LineCount.excludes": [ 
+                         "**/.vscode/**",
+                        "**/node_modules/**"
+                        ]
 
-For example:
+    //统计工作区输出文件和目录   
+    "LineCount.output": [
+                         "txt": true,       //是否输出txt文件
+                        "json": true,       //是否输出json文件
+                        "outdir":"out"      //输出目录
+                        ]
 
-This extension contributes the following settings:
+    //定义注释符号
+    "LineCount.comment":[
+                        {
+                            "ext": [
+                                "c","cpp","java"        //文件的扩展名
+                            ],
+                            "separator": {              //注释符号
+                                "linecomment": "//",    //单行注释符
+                                "blockstart": "/*",     //块开始注释符
+                                "blockend": "*/",       //块结束注释符
+                                "linestart": false,     //注释符是否必须在行首
+                                "continuationmark": "\\"        //续行符号 
+                                
+                            }
+                        },
+                       {
+                            "ext": [
+                                "rb"
+                            ],
+                            "separator": {
+                                "linecomment": "#",
+                                "blockstart": "=begin",
+                                "blockend": "=end",
+                                "linestart": true
+                            }
+                        },
+                        {
+                            "ext": [
+                                "html",
+                                "xml"
+                            ],
+                            "separator": {
+                                "blockstart": "<!--",
+                                "blockend": "-->"
+                                //该语言不存在的注释符号项不写，如linecomment等。
+                            }
+                        }
+                    ]
+        
 
-* `myExtension.enable`: enable/disable this extension
-* `myExtension.thing`: set to `blah` to do something
+```
 
-## Known Issues
+## 使用
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+1.统计当前文档行数：
+按F1，输入LineCount，选择LineCount: Count current file，即可在输出窗口输出：
 
-## Release Notes
+2.统计工作区文档行数：
+按F1，输入LineCount，选择LineCount: Count Workspace files,
+统计完毕后，在输出窗口输出文件总数，代码总数，注释总数，空白行总数。
+每个文件的代码行数信息输出到指定路径的linecount.txt或linecount.json文档中。
 
-Users appreciate release notes as you update your extension.
 
-### 1.0.0
+## 更多信息
 
-Initial release of ...
+[联系或更多信息，访问Repository](https://github.com/yycalm/linecount)
 
-### 1.0.1
+### 0.1.0
 
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
+发布
 
 -----------------------------------------------------------------------------------------------------------
-
-## Working with Markdown
-
-**Note:** You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on OSX or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+CMD+V` on OSX or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (OSX) to see a list of Markdown snippets
-
-### For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
+yycalm 2017
 
 **Enjoy!**

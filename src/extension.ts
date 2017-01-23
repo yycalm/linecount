@@ -26,6 +26,7 @@ export function activate(context: vscode.ExtensionContext) {
         counter.countWorkspace();      
     });
     context.subscriptions.push(disposable2);
+    
 
 }
 
