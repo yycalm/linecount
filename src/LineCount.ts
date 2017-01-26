@@ -179,6 +179,7 @@ export default class LineCount {
        let iscode :boolean = false;
        let continueNum : number = 0;
        let result = { code: 0, comment: 0, blank: 0 };
+       
        let eol = '\n';
        if(text.includes('\r\n')){
            eol='\r\n';
@@ -302,9 +303,9 @@ export default class LineCount {
 
         this.out.show();
         this.out.appendLine(doc.fileName+' file lines count:');
-        this.out.appendLine(`   code is ${linenum.code} lines.`);
-        this.out.appendLine(`   comment is ${linenum.comment} lines.`);
-        this.out.appendLine(`   blank is ${linenum.blank} lines.`);
+        this.out.appendLine(`   code is ${linenum.code} `+(linenum.code>1?'lines.':'line.'));
+        this.out.appendLine(`   comment is ${linenum.comment} `+(linenum.comment>1?'lines.':'line.'));
+        this.out.appendLine(`   blank is ${linenum.blank} `+(linenum.blank>1?'lines.':'line.'));
 
     }
 

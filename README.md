@@ -111,9 +111,9 @@ LineCount configuration：
 
 按F1，输入LineCount，选择LineCount: Count current file，即可在输出窗口输出：
 
-![Count current file](https://github.com/yycalm/linecount/blob/master/images/countfile.png)
+![Count current file](https://github.com/yycalm/linecount/blob/master/images/countfile.png?raw=true)
 
-![output result](https://github.com/yycalm/linecount/blob/master/images/countfile_out.png)
+![output result](https://github.com/yycalm/linecount/blob/master/images/countfile_out.png?raw=true)
 
 
 2.统计工作区文档行数：
@@ -124,9 +124,9 @@ LineCount configuration：
 
 每个文件的代码行数信息输出到指定路径的linecount.txt或linecount.json文档中。
 
-![Count workspace files output to txt file](https://github.com/yycalm/linecount/blob/master/images/countworkspace_outtxt.png)
+![Count workspace files output to txt file](https://github.com/yycalm/linecount/blob/master/images/countworkspace_outtxt.png?raw=true)
 
-![Count workspace files output to json file](https://github.com/yycalm/linecount/blob/master/images/countworkspace_outjson.png)
+![Count workspace files output to json file](https://github.com/yycalm/linecount/blob/master/images/countworkspace_outjson.png?raw=true)
 
 
 ## 更多信息
