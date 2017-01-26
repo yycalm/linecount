@@ -57,6 +57,8 @@ export default class LineCount {
         this.commentRule.length = 0;
         this.commentRule['c']={"linecomment":"//","blockstart":"/*","blockend":"*/","continuationmark":"\\"};
         this.commentRule['cpp']={"linecomment":"//","blockstart":"/*","blockend":"*/","continuationmark":"\\"};
+        this.commentRule['js']={"linecomment":"//","blockstart":"/*","blockend":"*/"};
+        this.commentRule['ts']={"linecomment":"//","blockstart":"/*","blockend":"*/"};
         this.commentRule['pas']={"linecomment":"//","blockstart":"{","blockend":"}"};
         this.commentRule['vb']={"linecomment":"'"};
         this.commentRule['bas']={"linecomment":"'"};
@@ -177,8 +179,14 @@ export default class LineCount {
        let iscode :boolean = false;
        let continueNum : number = 0;
        let result = { code: 0, comment: 0, blank: 0 };
+       let eol = '\n';
+       if(text.includes('\r\n')){
+           eol='\r\n';
+       }else if(text.includes(this.eol)){
+           eol = this.eol;
+       }
 
-       text.split(this.eol).forEach((line,index,array) => {
+       text.split(eol).forEach((line,index,array) => {
            var ln = line.trim();
            var pos = 0;
 
@@ -289,7 +297,7 @@ export default class LineCount {
 
         let doc = editor.document;
         let rule = this.getRule(doc.fileName);
-       
+        
         let linenum = this.parseRule(doc.getText(), rule);
 
         this.out.show();

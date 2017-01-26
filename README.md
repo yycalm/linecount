@@ -2,11 +2,11 @@
 
 LineCount 是一个vscode(visual studio code )下的插件，用来统计代码行数。使用TypeScript语言编写。
 
-[![Version](https://vsmarketplacebadge.apphb.com/version/linecount.svg)](https://marketplace.visualstudio.com/items?itemName=linecount)
+[![Version](https://vsmarketplacebadge.apphb.com/version/yycalm.linecount.svg)](https://marketplace.visualstudio.com/items?itemName=yycalm.linecount)
 
-[![Installs](https://vsmarketplacebadge.apphb.com/installs/linecount.svg)](https://marketplace.visualstudio.com/items?itemName=linecount)
+[![Installs](https://vsmarketplacebadge.apphb.com/installs/yycalm.linecount.svg)](https://marketplace.visualstudio.com/items?itemName=yycalm.linecount)
 
-[![Ratings](https://vsmarketplacebadge.apphb.com/rating/linecount.svg)](https://marketplace.visualstudio.com/items?itemName=linecount)
+[![Ratings](https://vsmarketplacebadge.apphb.com/rating/yycalm.linecount.svg)](https://marketplace.visualstudio.com/items?itemName=yycalm.linecount)
 
 ---
 
@@ -101,6 +101,10 @@ LineCount configuration：
 
 ```
 
+**注意:**
+
+续行符号慎用，不支持单引号字符串中的续行符号.
+
 ## 使用
 
 1.统计当前文档行数：
@@ -123,6 +127,7 @@ LineCount configuration：
 ![Count workspace files output to txt file](https://github.com/yycalm/linecount/blob/master/images/countworkspace_outtxt.png)
 
 ![Count workspace files output to json file](https://github.com/yycalm/linecount/blob/master/images/countworkspace_outjson.png)
+
 
 ## 更多信息
 
