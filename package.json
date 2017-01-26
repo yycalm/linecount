@@ -2,39 +2,38 @@
     "name": "linecount",
     "displayName": "LineCount",
     "description": "Count the lines of code.",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "publisher": "yycalm",
     "icon": "images/counticon.png",
     "author": {
-		"name": "yycalm",
-		"url": "https://github.com/yycalm",
-		"email": "yycalm@qq.com"
-	},
+        "name": "yycalm",
+        "url": "https://github.com/yycalm",
+        "email": "yycalm@qq.com"
+    },
     "license": "SEE LICENSE IN LICENSE.md",
     "bugs": {
-        "url": "https://github.com/yycalm/linecount/issues", 
-		"email": "yycalm@qq.com"		
-   },
+        "url": "https://github.com/yycalm/linecount/issues",
+        "email": "yycalm@qq.com"
+    },
     "homepage": "https://github.com/yycalm/linecount",
     "repository": {
         "type": "git",
         "url": "https://github.com/yycalm/linecount.git"
     },
-	"keywords": [
-		"linecount",
-		"line",
-		"count",
-		"codeline",
+    "keywords": [
+        "linecount",
+        "line",
+        "count",
+        "codeline",
         "codecount"
     ],
-    
     "engines": {
         "vscode": "^1.5.0"
     },
     "categories": [
-        "Other","Languages"
+        "Other",
+        "Languages"
     ],
-
     "activationEvents": [
         "*",
         "onCommand:extension.linecount.currentfile",
@@ -115,7 +114,7 @@
                     "default": {
                         "txt": true,
                         "json": true,
-                        "outdir":"out"
+                        "outdir": "out"
                     },
                     "description": "Type of output file."
                 }
@@ -128,13 +127,13 @@
         "postinstall": "node ./node_modules/vscode/bin/install",
         "test": "node ./node_modules/vscode/bin/test"
     },
-	"dependencies": {
-		"@types/node": "^6.0.54",
-		"fs": "^0.0.2"
+    "dependencies": {
+        "@types/node": "^6.0.54",
+        "fs": "^0.0.2"
     },
     "devDependencies": {
         "typescript": "^2.0.3",
-        "vscode": "^1.0.0",        
+        "vscode": "^1.0.0",
         "mocha": "^2.3.3",
         "@types/node": "^6.0.40",
         "@types/mocha": "^2.2.32"
