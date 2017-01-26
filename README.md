@@ -69,20 +69,9 @@ LineCount configuration：
                                 "linecomment": "//",    //单行注释符
                                 "blockstart": "/*",     //块开始注释符
                                 "blockend": "*/",       //块结束注释符
-                                "linestart": false,     //注释符是否必须在行首
+                                "linestart": false,     //注释符是否必须在行首,不写默认为false
                                 "continuationmark": "\\"        //续行符号 
                                 
-                            }
-                        },
-                       {
-                            "ext": [
-                                "rb"
-                            ],
-                            "separator": {
-                                "linecomment": "#",
-                                "blockstart": "=begin",
-                                "blockend": "=end",
-                                "linestart": true
                             }
                         },
                         {
