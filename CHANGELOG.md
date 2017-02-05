@@ -15,4 +15,13 @@ All notable changes to the "linecount" extension will be documented in this file
 
 3. Add dependencies
 
+## Version 0.1.3 (2017-02-05)
+
+- **Bug Fixes**
+
+1. Comment and blank lines for the wrong number.
+
+2. Exclude output file.
+
+
 

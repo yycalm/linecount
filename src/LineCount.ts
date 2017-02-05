@@ -98,7 +98,7 @@ export default class LineCount {
 
         this.includes = "{"+conf.get("includes","*.*").toString()+"}";
         let s = conf.get("excludes","**/.vscode/**,**/node_modules/**").toString();
-        this.excludes = "{"+s+','+this.EXTENSION_NAME+'.txt,'+this.EXTENSION_NAME+'.json,'+this.EXTENSION_NAME+'.csv}';
+        this.excludes = "{"+s+',**/'+this.EXTENSION_NAME+'.txt,**/'+this.EXTENSION_NAME+'.json,**/'+this.EXTENSION_NAME+'.csv}';
         console.log(this.includes);
         console.log(this.excludes);
 
@@ -167,13 +167,13 @@ export default class LineCount {
        let block_enable:boolean =  (sep.hasOwnProperty('blockstart') && sep.hasOwnProperty('blockend'));
        let blockstart = sep['blockstart'];
        let blockend = sep['blockend'];
-       let linestart:boolean =  sep['linestart']; //sep.hasOwnProperty('linestart')
+       let linestart:boolean =  sep['linestart'];
        let continuationmark = sep['continuationmark'];
-        console.log(line_enable);
-        console.log(linecomment);
-        console.log(block_enable);
-        console.log(blockstart);
-        console.log(blockend);
+        // console.log(line_enable);
+        // console.log(linecomment);
+        // console.log(block_enable);
+        // console.log(blockstart);
+        // console.log(blockend);
         
        let isblock :boolean = false;
        let iscode :boolean = false;
@@ -338,8 +338,8 @@ export default class LineCount {
                         linenum.filename=file.fsPath.replace(dir,"");
                         this.filelist.push(linenum);
                         total.code=total.code+linenum.code;
-                        total.comment=total.code+linenum.comment;
-                        total.blank=total.code+linenum.blank;
+                        total.comment=total.comment+linenum.comment;
+                        total.blank=total.blank+linenum.blank;
                         if(this.filelist.length+failnum==files.length){
                             this.outFile(total);    
                         }
@@ -376,6 +376,8 @@ export default class LineCount {
 
     private out_txt(total:any){
         let filename = path.join(this.outpath, this.EXTENSION_NAME+'.txt');
+        console.log(filename);        
+        
         if(!fs.existsSync(filename)){
             let fd = fs.openSync(filename, 'w');
             //fs.closeSync(fd);

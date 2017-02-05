@@ -2,7 +2,7 @@
     "name": "linecount",
     "displayName": "LineCount",
     "description": "Count the lines of code.",
-    "version": "0.1.2",
+    "version": "0.1.3",
     "publisher": "yycalm",
     "icon": "images/counticon.png",
     "author": {
