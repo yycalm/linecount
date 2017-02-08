@@ -2,7 +2,7 @@
     "name": "linecount",
     "displayName": "LineCount",
     "description": "Count the lines of code.",
-    "version": "0.1.3",
+    "version": "0.1.4",
     "publisher": "yycalm",
     "icon": "images/counticon.png",
     "author": {
@@ -82,18 +82,10 @@
                                 "blockstart": "/*",
                                 "blockend": "*/",
                                 "linestart": false,
-                                "continuationmark": "\\"
-                            }
-                        },
-                        {
-                            "ext": [
-                                "rb"
-                            ],
-                            "separator": {
-                                "linecomment": "#",
-                                "blockstart": "=begin",
-                                "blockend": "=end",
-                                "linestart": true
+                                "string":{
+                                    "doublequotes": true,
+                                    "singlequotes": false
+                                }
                             }
                         },
                         {
@@ -103,7 +95,11 @@
                             ],
                             "separator": {
                                 "blockstart": "<!--",
-                                "blockend": "-->"
+                                "blockend": "-->",
+                                "string":{
+                                    "doublequotes": true,
+                                    "singlequotes": false
+                                }
                             }
                         }
                     ],
@@ -117,6 +113,11 @@
                         "outdir": "out"
                     },
                     "description": "Type of output file."
+                },
+                "LineCount.showStatusBarItem": {
+                    "type": "boolean",
+                    "default": true,                    
+                    "description": "Whether to show a 'LineCount' item in the status bar for launching the count."
                 }
             }
         }

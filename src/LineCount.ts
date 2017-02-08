@@ -15,16 +15,17 @@ export default class LineCount {
     private outpath:string;    
     private outtype:any;
     private filelist:Array<Object>;
-    private commentRule:Array<Object>;
+    private builtinRule:Array<Object>;
     private configRule:Array<Object>;
 
+    public  showStatusBarItem:boolean;
     public  EXTENSION_NAME:string;
     public  EXTENSION_VERSION:string;
     
     constructor(context: vscode.ExtensionContext) {  
 
         this.filelist = new Array();
-        this.commentRule = new Array();
+        this.builtinRule = new Array();
         this.configRule = new Array();
         
         this.EXTENSION_NAME = 'linecount';
@@ -54,60 +55,62 @@ export default class LineCount {
         //     }
         // });       
 
-        this.commentRule.length = 0;
-        this.commentRule['c']={"linecomment":"//","blockstart":"/*","blockend":"*/","continuationmark":"\\"};
-        this.commentRule['cpp']={"linecomment":"//","blockstart":"/*","blockend":"*/","continuationmark":"\\"};
-        this.commentRule['js']={"linecomment":"//","blockstart":"/*","blockend":"*/"};
-        this.commentRule['ts']={"linecomment":"//","blockstart":"/*","blockend":"*/"};
-        this.commentRule['pas']={"linecomment":"//","blockstart":"{","blockend":"}"};
-        this.commentRule['vb']={"linecomment":"'"};
-        this.commentRule['bas']={"linecomment":"'"};
-        this.commentRule['vbs']={"linecomment":"'"};
-        this.commentRule['css']={"linecomment":"//","blockstart":"/*","blockend":"*/"};
-        this.commentRule['sql']={"linecomment":"--","blockstart":"/*","blockend":"*/"};
-        this.commentRule['html']={"blockstart":"<!--","blockend":"-->"};
-        this.commentRule['xml']={"blockstart":"<!--","blockend":"-->"};
-        this.commentRule['py']={"linecomment":"#","blockstart":"'''","blockend":"'''"};
-        this.commentRule['bat']={"linecomment":"rem "};
-        this.commentRule['sh']={"linecomment":"#"};
-        this.commentRule['ini']={"linecomment":";"};
-        this.commentRule['for']={"linecomment":"!"};
-        this.commentRule['m']={"linecomment":"%"};
-        this.commentRule['perl']={"linecomment":"#","blockstart":"=pod","blockend":"=cut"};
-        this.commentRule['pl']={"linecomment":"#","blockstart":"=pod","blockend":"=cut"};
-        this.commentRule['pm']={"linecomment":"#","blockstart":"=pod","blockend":"=cut"};
-        this.commentRule['rb']={"linecomment":"#","blockstart":"=begin","blockend":"=end"};
-        this.commentRule['jsp']={"blockstart":"<%--","blockend":"--%>"};
+        this.builtinRule.length = 0;
+        this.builtinRule['c']={"linecomment":"//","blockstart":"/*","blockend":"*/","string":{"doublequotes": true}};
+        this.builtinRule['cpp']={"linecomment":"//","blockstart":"/*","blockend":"*/","string":{"doublequotes": true}};
+        this.builtinRule['java']={"linecomment":"//","blockstart":"/*","blockend":"*/","string":{"doublequotes": true}};
+        this.builtinRule['js']={"linecomment":"//","blockstart":"/*","blockend":"*/","string":{"doublequotes": true,"singlequotes": true}};
+        this.builtinRule['ts']={"linecomment":"//","blockstart":"/*","blockend":"*/","string":{"doublequotes": true,"singlequotes": true}};
+        this.builtinRule['pas']={"linecomment":"//","blockstart":"{","blockend":"}","string":{"doublequotes": true}};
+        this.builtinRule['css']={"linecomment":"//","blockstart":"/*","blockend":"*/","string":{"doublequotes": true}};
+        this.builtinRule['sql']={"linecomment":"--","blockstart":"/*","blockend":"*/","string":{"singlequotes": true}};
+        this.builtinRule['html']={"blockstart":"<!--","blockend":"-->","string":{"doublequotes": true}};
+        this.builtinRule['xml']={"blockstart":"<!--","blockend":"-->","string":{"doublequotes": true}};
+        this.builtinRule['py']={"linecomment":"#","blockstart":"'''","blockend":"'''","string":{"doublequotes": true,"singlequotes": true}};
+        this.builtinRule['perl']={"linecomment":"#","blockstart":"=pod","blockend":"=cut","string":{"doublequotes": true,"singlequotes": true}};
+        this.builtinRule['pl']={"linecomment":"#","blockstart":"=pod","blockend":"=cut","string":{"doublequotes": true,"singlequotes": true}};
+        this.builtinRule['pm']={"linecomment":"#","blockstart":"=pod","blockend":"=cut"};
+        this.builtinRule['rb']={"linecomment":"#","blockstart":"=begin","blockend":"=end"};
+        this.builtinRule['jsp']={"blockstart":"<%--","blockend":"--%>","string":{"doublequotes": true}};
+        this.builtinRule['vb']={"linecomment":"'"};
+        this.builtinRule['bas']={"linecomment":"'"};
+        this.builtinRule['vbs']={"linecomment":"'"};
+        this.builtinRule['bat']={"linecomment":"rem "};
+        this.builtinRule['sh']={"linecomment":"#"};
+        this.builtinRule['ini']={"linecomment":";"};
+        this.builtinRule['for']={"linecomment":"!"};
+        this.builtinRule['m']={"linecomment":"%"};
+
+        //this.getConfig();
 
     }
 
-    private init(){
-        console.log("init start");
+    public getConfig(){
+        
         if (!this.out) {
             this.out = vscode.window.createOutputChannel(this.EXTENSION_NAME);
         }
 
-        console.log("getConfiguration start");
         let conf = vscode.workspace.getConfiguration("LineCount");
+        this.showStatusBarItem = conf.get("showStatusBarItem",true);
         this.eol =  conf.get("eol","\r\n");
         this.encoding =  conf.get("encoding","utf8");
         if(this.encoding.toLowerCase() =="gbk"){
             this.encoding="utf8";
         }
-        console.log(this.encoding);
-
+ 
         this.includes = "{"+conf.get("includes","*.*").toString()+"}";
         let s = conf.get("excludes","**/.vscode/**,**/node_modules/**").toString();
         this.excludes = "{"+s+',**/'+this.EXTENSION_NAME+'.txt,**/'+this.EXTENSION_NAME+'.json,**/'+this.EXTENSION_NAME+'.csv}';
-        console.log(this.includes);
-        console.log(this.excludes);
+        //console.log(this.includes);
+        //console.log(this.excludes);
 
         this.outtype = conf.get("output",{"txt":true,"json":false,"outdir":"out"});
         this.outdir = conf.get("outdir","out").toString();
         this.outpath =path.join(vscode.workspace.rootPath, this.outdir);       
-        console.log(this.outtype);
-        console.log(this.outdir);
-        console.log(this.outpath);
+        //console.log(this.outtype);
+        //console.log(this.outdir);
+        //console.log(this.outpath);
        
         this.configRule.length = 0; 
         let comment = conf.get('comment');
@@ -115,7 +118,6 @@ export default class LineCount {
             if (comment.hasOwnProperty(key)) {
                 var element = comment[key];
                 var extlist = element['ext'];
-                //console.log(extlist.toString());
              
                 for (var ext in extlist) {
                     if (extlist.hasOwnProperty(ext)) {
@@ -128,161 +130,6 @@ export default class LineCount {
        
     }
  
-    private parse(text:string):any{        
-       let isblock :boolean = false;
-       let result = { code: 0, comment: 0, blank: 0 };
-       text.split(this.eol).forEach((line) => {
-           var ln = line.trim();
-           var pos = 0;
-           if (isblock) {
-                result.comment++;  
-                isblock = this.endBlock(ln,"/*","*/");
-            } else if(ln.length==0){
-                   result.blank++;                  
-            } else if (ln.startsWith("//")) {  
-                 result.comment++;                 
-            } else if (ln.startsWith("/*") && !ln.includes("*/")) {  
-                result.comment++;  
-                isblock = true;  
-            } else if(ln.includes("/*")){
-                pos = ln.indexOf("/*");
-                isblock = this.endBlock(ln.substring(pos+2,ln.length),"/*","*/");
-                if(isblock){
-                    result.comment++;  
-                }else{
-                    result.code++;  
-                }
-            } else {  
-                result.code++;  
-            }  
-
-        });
-
-        return result;
-    }
-
-    private parseRule(text:string,sep:any):any{  
-       let line_enable:boolean = sep.hasOwnProperty('linecomment');
-       let linecomment = sep['linecomment'];
-       let block_enable:boolean =  (sep.hasOwnProperty('blockstart') && sep.hasOwnProperty('blockend'));
-       let blockstart = sep['blockstart'];
-       let blockend = sep['blockend'];
-       let linestart:boolean =  sep['linestart'];
-       let continuationmark = sep['continuationmark'];
-        // console.log(line_enable);
-        // console.log(linecomment);
-        // console.log(block_enable);
-        // console.log(blockstart);
-        // console.log(blockend);
-        
-       let isblock :boolean = false;
-       let iscode :boolean = false;
-       let continueNum : number = 0;
-       let result = { code: 0, comment: 0, blank: 0 };
-       
-       let eol = '\n';
-       if(text.includes('\r\n')){
-           eol='\r\n';
-       }else if(text.includes(this.eol)){
-           eol = this.eol;
-       }
-
-       text.split(eol).forEach((line,index,array) => {
-           var ln = line.trim();
-           var pos = 0;
-
-           //判断是否有续行符号
-            if(continuationmark && continueNum>0){
-                if(!isblock && ln.endsWith(continuationmark)){
-                    continueNum++;
-                    return;
-                }
-            }
-
-            //判断注释
-           if (isblock) {
-                result.comment++;  
-                isblock = !this.endBlock(ln, blockstart, blockend);
-                iscode = !isblock;
-            } else if(ln.length==0){
-                result.blank++;                  
-                iscode = false;
-            } else if (line_enable && ln.startsWith(linecomment)) {  
-                result.comment++;                 
-                iscode = false;
-            } else if (block_enable && ln.startsWith(blockstart) ) {  
-                result.comment++;  
-                isblock = !this.endBlock(ln.substring(1,ln.length), blockstart, blockend);
-                iscode = !isblock;
-            } else if(block_enable && !linestart && ln.includes(blockstart)){
-                pos = ln.indexOf(blockstart);
-                isblock = !this.endBlock(ln, blockstart, blockend);
-                if(isblock){
-                    result.comment++;  
-                    iscode = false;
-                }else{
-                    result.code++;  
-                    iscode = true;
-                }
-            } else {  
-                result.code++; 
-                iscode = true; 
-            } 
-
-            //判断是否有续行符号
-            if(continuationmark){
-                if(iscode && ln.endsWith(continuationmark)){
-                    continueNum++;
-                }else{
-                    continueNum = 0;    
-                }
-            }
-
-  
-        });
-
-        return result;
-    }
-
-    private endBlock(line:string, startSep:string, endSep:string):boolean{        
-        var pos = 0;
-        var isblock = false;
-        do
-        {
-            pos = line.indexOf(endSep,pos);
-            if(pos>=0){
-                isblock = true;
-                do{
-                    pos = line.indexOf(startSep, pos+startSep.length);
-                    if(pos>0 && !this.inString(line, pos)){
-                        isblock = false;
-                        break;
-                    }
-                }while(pos>0);
-            }
-        }while(pos>=0);
-
-        return isblock;
-    }
-      
-    private getRule(filename:string):any{
-        let ext = path.extname(filename).replace('.',"");
-        //console.log(ext);
-        if(this.configRule.hasOwnProperty(ext)){
-            return this.configRule[ext];
-        }else
-        if(this.configRule.hasOwnProperty('*')){
-            return this.configRule['*'];
-        }else
-        if(this.commentRule.hasOwnProperty(ext)){
-            return this.commentRule[ext];
-        }else
-        if(this.commentRule.hasOwnProperty('*')){
-            return this.commentRule['*'];
-        }else{
-            return {"linecomment":"//","blockstart":"/*","blockend":"*/"};
-        }
-    }
     // Get the current lines count
     public countCurrentFile() {                 
                 
@@ -293,8 +140,6 @@ export default class LineCount {
             vscode.window.showInformationMessage('No file open!');
             return;
         }
-
-        this.init();
 
         let doc = editor.document;
         let rule = this.getRule(doc.fileName);
@@ -314,8 +159,6 @@ export default class LineCount {
              vscode.window.showInformationMessage('No workspace open!');
              return;
         }
-
-        this.init();
 
         let dir = path.join(vscode.workspace.rootPath, path.sep);
 
@@ -348,6 +191,89 @@ export default class LineCount {
             });
         });       
            
+    }
+
+    //根据注释规则解析内容，返回行数对象
+    private parseRule(text:string, sep:any):any{  
+        let line_enable:boolean = sep.hasOwnProperty('linecomment');
+        let linecomment:string = sep['linecomment'];
+        let block_enable:boolean =  (sep.hasOwnProperty('blockstart') && sep.hasOwnProperty('blockend'));
+        let blockstart:string = sep['blockstart'];
+        let blockend:string = sep['blockend'];
+        let linestart:boolean =  (sep.hasOwnProperty('linestart') && sep['linestart']);
+
+        let doublequotes:boolean = true;
+        let singlequotes:boolean = false;
+        if(sep.hasOwnProperty('string')){
+            let quotes = sep['string'];
+            doublequotes = (quotes.hasOwnProperty('doublequotes') && quotes['doublequotes']);
+            singlequotes = (quotes.hasOwnProperty('singlequotes') && quotes['singlequotes']);
+        }
+        //let continuationmark = sep['continuationmark'];
+            // console.log(line_enable);
+            // console.log(linecomment);
+            // console.log(block_enable);
+            // console.log('doublequotes'+doublequotes);
+            // console.log('singlequotes'+singlequotes);
+            
+        let result = { blank: 0, code: 0, comment: 0 };
+        let lineFlag = 0;
+        
+        let len1 = linecomment.length;
+        let len2 = blockstart.length;
+        let len3 = blockend.length;
+        for(var i=0; i<text.length; i++){
+            if(text.charAt(i) ===' ' || text.charAt(i) ==='\t' || text.charAt(i) ==='\r') continue;
+            else if(line_enable && text.substr(i,len1)===linecomment){ 
+                if(!linestart || lineFlag===0){
+                    result.comment++; i+=len1; 
+                    while(i<text.length && text.charAt(i)!=='\n')i++; 
+                    lineFlag = 0;
+                }else{
+                    lineFlag = 1;   
+                }
+            }
+            else if(block_enable && text.substr(i,len2)===blockstart){
+                result.comment++; i+=len2;
+                while(i<text.length && text.substr(i,len3)!==blockend){
+                    if(text.charAt(i)==='\n')result.comment++;
+                    i++;
+                }
+                lineFlag = 2;
+            }
+            else if(doublequotes && text.charAt(i)==='"'){ i++; while(i<text.length && text.charAt(i)!=='"'){if(text.charAt(i)==='\\')i++;i++;}}
+            else if(singlequotes && text.charAt(i)==='\''){ i++; while(i<text.length && text.charAt(i)!=='\''){if(text.charAt(i)==='\\')i++;i++;}}
+            else if(text.charAt(i)==='\n'){ 
+                if(lineFlag===0)result.blank++; 
+                else if(lineFlag===1)result.code++;
+                lineFlag = 0;
+            }
+            else lineFlag = 1;
+        }
+
+        return result;
+    }
+
+    private getRule(filename:string):any{
+        let ext = path.extname(filename).replace('.',"");
+        //console.log(ext);
+        if(this.configRule.hasOwnProperty(ext)){
+            return this.configRule[ext];
+        }else
+        if(this.configRule.hasOwnProperty('*')){
+            return this.configRule['*'];
+        }else
+        if(this.builtinRule.hasOwnProperty(ext)){
+            return this.builtinRule[ext];
+        }else
+        if(this.builtinRule.hasOwnProperty('*')){
+            return this.builtinRule['*'];
+        }else
+        if(this.builtinRule.hasOwnProperty('c')){
+            return this.builtinRule['c'];
+        }else{
+            return {"linecomment":"//","blockstart":"/*","blockend":"*/"};
+        }
     }
 
     private outFile(total:any){
@@ -469,7 +395,8 @@ export default class LineCount {
             };
         }
 
-        let item={"counttime":this.getDateTime(),
+        let item={"version":this.EXTENSION_VERSION,
+                "counttime":this.getDateTime(),
                 "filenum":this.filelist.length,
                 "codenum":total['code'],
                 "commentnum":total['comment'],
