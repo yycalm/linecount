@@ -27,9 +27,11 @@ All notable changes to the "linecount" extension will be documented in this file
 
 ## Version 0.1.4 (2017-02-08)
 
-1. delete continuationmark;
+1. delete continuation mark.
 
 2. add string quotes config.
+
+3. add statusBarItem.
 
 
 
