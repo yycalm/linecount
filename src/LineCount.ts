@@ -146,13 +146,13 @@ export default class LineCount {
         
         let linenum = this.parseRule(doc.getText(), rule);
 
-        this.out.show();
+         this.out.show();
         this.out.appendLine(doc.fileName+' file lines count:');
         this.out.appendLine(`   code is ${linenum.code} `+(linenum.code>1?'lines.':'line.'));
         this.out.appendLine(`   comment is ${linenum.comment} `+(linenum.comment>1?'lines.':'line.'));
         this.out.appendLine(`   blank is ${linenum.blank} `+(linenum.blank>1?'lines.':'line.'));
 
-    }
+     }
 
     public countWorkspace() { 
         if(!vscode.workspace.rootPath){
@@ -217,21 +217,18 @@ export default class LineCount {
             // console.log('singlequotes'+singlequotes);
             
         let result = { blank: 0, code: 0, comment: 0 };
-        let lineFlag = 0;
-        
+        let newline :boolean = true;
         let len1 = linecomment.length;
         let len2 = blockstart.length;
         let len3 = blockend.length;
         for(var i=0; i<text.length; i++){
             if(text.charAt(i) ===' ' || text.charAt(i) ==='\t' || text.charAt(i) ==='\r') continue;
             else if(line_enable && text.substr(i,len1)===linecomment){ 
-                if(!linestart || lineFlag===0){
+                if(!linestart || newline){
                     result.comment++; i+=len1; 
                     while(i<text.length && text.charAt(i)!=='\n')i++; 
-                    lineFlag = 0;
-                }else{
-                    lineFlag = 1;   
-                }
+                    newline = true;
+               }
             }
             else if(block_enable && text.substr(i,len2)===blockstart){
                 result.comment++; i+=len2;
@@ -239,16 +236,16 @@ export default class LineCount {
                     if(text.charAt(i)==='\n')result.comment++;
                     i++;
                 }
-                lineFlag = 2;
-            }
+                if(i<text.length)i+=len3;
+                newline = false;
+           }
             else if(doublequotes && text.charAt(i)==='"'){ i++; while(i<text.length && text.charAt(i)!=='"'){if(text.charAt(i)==='\\')i++;i++;}}
             else if(singlequotes && text.charAt(i)==='\''){ i++; while(i<text.length && text.charAt(i)!=='\''){if(text.charAt(i)==='\\')i++;i++;}}
             else if(text.charAt(i)==='\n'){ 
-                if(lineFlag===0)result.blank++; 
-                else if(lineFlag===1)result.code++;
-                lineFlag = 0;
+                if(newline)result.blank++; 
+                else newline = true;
             }
-            else lineFlag = 1;
+            else if(newline){result.code++; newline = false; }
         }
 
         return result;
