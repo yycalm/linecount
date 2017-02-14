@@ -56,28 +56,35 @@ export default class LineCount {
         // });       
 
         this.builtinRule.length = 0;
-        this.builtinRule['c']={"linecomment":"//","blockstart":"/*","blockend":"*/","string":{"doublequotes": true}};
-        this.builtinRule['cpp']={"linecomment":"//","blockstart":"/*","blockend":"*/","string":{"doublequotes": true}};
-        this.builtinRule['java']={"linecomment":"//","blockstart":"/*","blockend":"*/","string":{"doublequotes": true}};
-        this.builtinRule['js']={"linecomment":"//","blockstart":"/*","blockend":"*/","string":{"doublequotes": true,"singlequotes": true}};
-        this.builtinRule['ts']={"linecomment":"//","blockstart":"/*","blockend":"*/","string":{"doublequotes": true,"singlequotes": true}};
-        this.builtinRule['pas']={"linecomment":"//","blockstart":"{","blockend":"}","string":{"doublequotes": true}};
-        this.builtinRule['css']={"linecomment":"//","blockstart":"/*","blockend":"*/","string":{"doublequotes": true}};
-        this.builtinRule['sql']={"linecomment":"--","blockstart":"/*","blockend":"*/","string":{"singlequotes": true}};
-        this.builtinRule['html']={"blockstart":"<!--","blockend":"-->","string":{"doublequotes": true}};
-        this.builtinRule['xml']={"blockstart":"<!--","blockend":"-->","string":{"doublequotes": true}};
+        let cstyle={"linecomment":"//","blockstart":"/*","blockend":"*/","string":{"doublequotes": true,"singlequotes": true}};
+        this.builtinRule['c']=cstyle;
+        this.builtinRule['cpp']=cstyle;
+        this.builtinRule['h']=cstyle;
+        this.builtinRule['hpp']=cstyle;
+        this.builtinRule['java']=cstyle;
+        this.builtinRule['js']=cstyle;
+        this.builtinRule['ts']=cstyle;
+        this.builtinRule['css']=cstyle;
+        this.builtinRule['cs']=cstyle;
+        this.builtinRule['jsp']=cstyle;
+        let podstyle={"linecomment":"#","blockstart":"=pod","blockend":"=cut","blocktol": true,"string":{"doublequotes": true,"singlequotes": true}};
+        this.builtinRule['perl']=podstyle;
+        this.builtinRule['pl']=podstyle;
+        this.builtinRule['pm']=podstyle;
         this.builtinRule['py']={"linecomment":"#","blockstart":"'''","blockend":"'''","string":{"doublequotes": true,"singlequotes": true}};
-        this.builtinRule['perl']={"linecomment":"#","blockstart":"=pod","blockend":"=cut","string":{"doublequotes": true,"singlequotes": true}};
-        this.builtinRule['pl']={"linecomment":"#","blockstart":"=pod","blockend":"=cut","string":{"doublequotes": true,"singlequotes": true}};
-        this.builtinRule['pm']={"linecomment":"#","blockstart":"=pod","blockend":"=cut"};
-        this.builtinRule['rb']={"linecomment":"#","blockstart":"=begin","blockend":"=end"};
-        this.builtinRule['jsp']={"blockstart":"<%--","blockend":"--%>","string":{"doublequotes": true}};
-        this.builtinRule['vb']={"linecomment":"'"};
-        this.builtinRule['bas']={"linecomment":"'"};
-        this.builtinRule['vbs']={"linecomment":"'"};
-        this.builtinRule['bat']={"linecomment":"rem "};
-        this.builtinRule['sh']={"linecomment":"#"};
-        this.builtinRule['ini']={"linecomment":";"};
+        this.builtinRule['rb']={"linecomment":"#","blockstart":"=begin","blockend":"=end","blocktol": true};
+        this.builtinRule['sql']={"linecomment":"--","blockstart":"/*","blockend":"*/","string":{"doublequotes": false,"singlequotes": true}};
+        this.builtinRule['pas']={"linecomment":"//","blockstart":"{*","blockend":"*}","string":{"doublequotes": true,"singlequotes": true}};
+        let vbstyle = {"linecomment":"'","string":{"doublequotes": true,"singlequotes": false}};
+        this.builtinRule['vb']=vbstyle;
+        this.builtinRule['bas']=vbstyle;
+        this.builtinRule['vbs']=vbstyle;
+        let htmstyle ={"blockstart":"<!--","blockend":"-->"};
+        this.builtinRule['html']=htmstyle;
+        this.builtinRule['xml']=htmstyle;
+        this.builtinRule['bat']={"linecomment":"::"};
+        this.builtinRule['sh']={"linecomment":"#","linetol":true};
+        this.builtinRule['ini']={"linecomment":";","linetol":true};
         this.builtinRule['for']={"linecomment":"!"};
         this.builtinRule['m']={"linecomment":"%"};
 
@@ -99,19 +106,16 @@ export default class LineCount {
             this.encoding="utf8";
         }
  
+        this.outtype = conf.get("output",{"txt":true,"json":false,"outdir":"out"});
+        this.outdir = conf.get("outdir","out").toString();
+        this.outpath =path.join(vscode.workspace.rootPath, this.outdir);       
+
         this.includes = "{"+conf.get("includes","*.*").toString()+"}";
         let s = conf.get("excludes","**/.vscode/**,**/node_modules/**").toString();
         this.excludes = "{"+s+',**/'+this.EXTENSION_NAME+'.txt,**/'+this.EXTENSION_NAME+'.json,**/'+this.EXTENSION_NAME+'.csv}';
         //console.log(this.includes);
         //console.log(this.excludes);
 
-        this.outtype = conf.get("output",{"txt":true,"json":false,"outdir":"out"});
-        this.outdir = conf.get("outdir","out").toString();
-        this.outpath =path.join(vscode.workspace.rootPath, this.outdir);       
-        //console.log(this.outtype);
-        //console.log(this.outdir);
-        //console.log(this.outpath);
-       
         this.configRule.length = 0; 
         let comment = conf.get('comment');
         for (var key in comment) {
@@ -195,49 +199,44 @@ export default class LineCount {
 
     //根据注释规则解析内容，返回行数对象
     private parseRule(text:string, sep:any):any{  
-        let line_enable:boolean = sep.hasOwnProperty('linecomment');
-        let linecomment:string = sep['linecomment'];
-        let block_enable:boolean =  (sep.hasOwnProperty('blockstart') && sep.hasOwnProperty('blockend'));
-        let blockstart:string = sep['blockstart'];
-        let blockend:string = sep['blockend'];
-        let linestart:boolean =  (sep.hasOwnProperty('linestart') && sep['linestart']);
-
+        let block_enable:boolean =  (sep['blockstart'] && sep['blockend']);
         let doublequotes:boolean = true;
-        let singlequotes:boolean = false;
+        let singlequotes:boolean = true;
         if(sep.hasOwnProperty('string')){
             let quotes = sep['string'];
-            doublequotes = (quotes.hasOwnProperty('doublequotes') && quotes['doublequotes']);
-            singlequotes = (quotes.hasOwnProperty('singlequotes') && quotes['singlequotes']);
+            if(quotes.hasOwnProperty('doublequotes'))doublequotes = quotes['doublequotes'];
+            if(quotes.hasOwnProperty('singlequotes')) singlequotes = quotes['singlequotes'];
         }
         //let continuationmark = sep['continuationmark'];
-            // console.log(line_enable);
-            // console.log(linecomment);
-            // console.log(block_enable);
-            // console.log('doublequotes'+doublequotes);
-            // console.log('singlequotes'+singlequotes);
+
+        let cmtlen={"line":0,"b1":0,"b2":0};
+        if(sep.linecomment)cmtlen.line = sep.linecomment.length;
+        if(block_enable){cmtlen.b1=sep.blockstart.length; cmtlen.b2 = sep.blockend.length;}
             
         let result = { blank: 0, code: 0, comment: 0 };
         let newline :boolean = true;
-        let len1 = linecomment.length;
-        let len2 = blockstart.length;
-        let len3 = blockend.length;
+
         for(var i=0; i<text.length; i++){
             if(text.charAt(i) ===' ' || text.charAt(i) ==='\t' || text.charAt(i) ==='\r') continue;
-            else if(line_enable && text.substr(i,len1)===linecomment){ 
-                if(!linestart || newline){
-                    result.comment++; i+=len1; 
+            else if(sep.linecomment && text.substr(i, cmtlen.line)===sep.linecomment){ 
+                if(!sep.linetol || newline){
+                    result.comment++; i+=cmtlen.line; 
                     while(i<text.length && text.charAt(i)!=='\n')i++; 
                     newline = true;
                }
             }
-            else if(block_enable && text.substr(i,len2)===blockstart){
-                result.comment++; i+=len2;
-                while(i<text.length && text.substr(i,len3)!==blockend){
-                    if(text.charAt(i)==='\n')result.comment++;
+            else if(block_enable && text.substr(i, cmtlen.b1)===sep.blockstart && (!sep.blocktol || newline)){               
+                let comment=0;
+                if(newline)comment++; 
+                i+=cmtlen.b1;
+                while(i<text.length && text.substr(i,cmtlen.b2)!==sep.blockend){
+                    if(text.charAt(i)==='\n')comment++;
                     i++;
                 }
-                if(i<text.length)i+=len3;
-                newline = false;
+                result.comment+=comment;
+                if(i<text.length)i+=cmtlen.b2;
+                while(text.charAt(i) ===' ' || text.charAt(i) ==='\t' || text.charAt(i) ==='\r')i++;
+                newline = (text.charAt(i)==='\n' || comment>0);
            }
             else if(doublequotes && text.charAt(i)==='"'){ i++; while(i<text.length && text.charAt(i)!=='"'){if(text.charAt(i)==='\\')i++;i++;}}
             else if(singlequotes && text.charAt(i)==='\''){ i++; while(i<text.length && text.charAt(i)!=='\''){if(text.charAt(i)==='\\')i++;i++;}}

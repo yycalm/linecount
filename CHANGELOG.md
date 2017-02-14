@@ -34,4 +34,12 @@ All notable changes to the "linecount" extension will be documented in this file
 3. add statusBarItem.
 
 
+## Version 0.1.5 (2017-02-14)
+
+1. add continuation linetol,blocktol, delete linestart.
+
+
+
+
+
 

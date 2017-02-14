@@ -1,6 +1,7 @@
 # LineCount README
 
-LineCount 是一个vscode(visual studio code )下的插件，用来统计代码行数。使用TypeScript语言编写。
+The LineCount extension for Visual Studio Code counts and displays the lines of code, the lines of comment, the lines of blank. 
+
 
 [![Version](https://vsmarketplacebadge.apphb.com/version/yycalm.linecount.svg)](https://marketplace.visualstudio.com/items?itemName=yycalm.linecount)
 
@@ -10,25 +11,25 @@ LineCount 是一个vscode(visual studio code )下的插件，用来统计代码�
 
 ---
 
-## 功能
+## Features
 
-1. 可以统计当前文档的代码行数，注释行数和空行数。
+* Count current file. 
 
-2. 可以统计当前工作区指定类型文件的代码行数，注释行数和空行数。
+* Count workspace files, you can custom the includes/excludes file pattern.
 
-3. 内置十几种语言支持，如常见的c,cpp,java,jsp,sql,css,html,python等。
+* Support languages: c,cpp,java,js,ts,cs,sql,pas,perl,python,ruby,vb('),html(<!--,-->),bat(::),sh(#),ini(;),fortran(!),m(%).
 
-4. 可以自定义语言注释符号，新增未知语言支持。
+* You can customize the comment symbol.
 
-5. 统计行数信息可以输出到txt和json文档，以累加方式输出，便于日后查看统计。
+* Line number information can be output to JSON, TXT file.
 
-## 安装
+## Installs
 
-1. 在vscode中按F1，输入ext install linecount安装。
+* ext install linecount
 
-2. 在vscode扩展应用商店中搜索linecount安装。
+* Through Code
 
-3. 通过源码安装：
+    Download source code and install dependencies:
 
 ```
 git clone https://github.com/yycalm/linecount.git
@@ -37,96 +38,85 @@ npm install
 code .
 ```
 
-## 配置
+## Extension Settings
+ 
+* `LineCount.showStatusBarItem`:(boolean|default `true`) Show/hide the status bar item for LineCount commands.
+* `LineCount.includes`:(string array|default `"**/*"`) Search files pattern.
+* `LineCount.excludes`:(string array|default `"**/.vscode/**,**/node_modules/**"`) files and folders that you want exclude them.
+* `LineCount.output.txt`:(boolean | default `true`) Whether output to TXT file.
+* `LineCount.output.json`:(boolean | default `true`) Whether output to JSON file.
+* `LineCount.output.outdir`:(string | default `out`) output file path.
+* `LineCount.output.comment.ext`:(string array| required) file extension. if it`s "*", the rule for other files. default c style.
+* `LineCount.output.comment.separator.linecomment`:(string |default none) Single line comment symbol.
+* `LineCount.output.comment.separator.linetol`:(boolean |default `false`) Whether the line comment must be started on the line.
+* `LineCount.output.comment.separator.blockstart`:(string |default none) Block start comment symbol.
+* `LineCount.output.comment.separator.blockend`:(string |default none) Block end comment symbol.
+* `LineCount.output.comment.separator.blocktol`:(boolean |default `false`) Whether the block comment must be started on the line.
+* `LineCount.output.comment.separator.string.doublequotes`:(boolean |default `true`) String using double quotes.
+* `LineCount.output.comment.separator.string.singlequotes`:(boolean |default `true`) String using single quotes.
 
-LineCount configuration：
+  LineCount configuration examples：
 
 ```
-    //统计包含的文件
     "LineCount.includes": [     
                         "**/*" 
                         ]         
     
-    //统计排除的文件夹和文件                 
     "LineCount.excludes": [ 
                          "**/.vscode/**",
                         "**/node_modules/**"
                         ]
 
-    //输出文件和目录   
-    "LineCount.output": [
-                         "txt": true,       //是否输出txt文件
-                        "json": true,       //是否输出json文件
-                        "outdir":"out"      //输出目录
-                        ]
+    "LineCount.output": {
+                         "txt": true,       
+                        "json": true,       
+                        "outdir":"out"      
+                        }
 
-    //定义注释符号
     "LineCount.comment":[
                         {
-                            "ext": [
-                                "c","cpp","java"        //文件的扩展名
-                            ],
-                            "separator": {              //注释符号
-                                "linecomment": "//",    //单行注释符
-                                "blockstart": "/*",     //块开始注释符
-                                "blockend": "*/",       //块结束注释符
-                                "linestart": false,     //注释符是否必须在行首,不写默认为false
+                            "ext": ["c","cpp","java"], 
+                            "separator": {             
+                                "linecomment": "//",   
+                                "linetol":false,       
+                                "blockstart": "/*",    
+                                "blockend": "*/",      
+                                "blocktol": false,     
                                 "string":{
-                                    "doublequotes": true,   //字符串使用双引号，用来排除字符串的注释符号
-                                    "singlequotes": false   //字符串不使用单引号，用来排除字符串的注释符号
-                                }
-                                
-                            }
-                        },
-                        {
-                            "ext": [
-                                "html",
-                                "xml"
-                            ],
-                            "separator": {
-                                "blockstart": "<!--",
-                                "blockend": "-->",
-                                 "string":{
                                     "doublequotes": true,
                                     "singlequotes": false
-                                }
-                               //该语言不存在的注释符号项不写，如linecomment等。
+                                }                                
                             }
                         }
-                    ]
+                     ]
         
 
 ```
 
 
 
-## 使用
+## Usage
 
-1. 统计当前文档行数：
+There are two commands available. 
+You can access them from the command palette (Ctrl+Shift+P on Windows/Linux), or click StatusBarItem 'LineCount'.
 
-按F1，输入LineCount，选择LineCount: Count current file，即可在输出窗口输出：
+1. LineCount: Count current file:
 
 ![Count current file](https://github.com/yycalm/linecount/blob/master/images/countcurrentfile.gif?raw=true)
 
 
-
-2. 统计工作区文档行数：
-
-按F1，输入LineCount，选择LineCount: Count Workspace files,
-
-统计完毕后，在输出窗口输出文件总数，代码总数，注释总数，空白行总数。
-
-每个文件的代码行数信息输出到指定路径的linecount.txt或linecount.json文档中。
+2. LineCount: Count Workspace files:
 
 ![Count workspace files](https://github.com/yycalm/linecount/blob/master/images/countworkspace.gif?raw=true)
 
 
-## 更多信息
+## Support
 
-[联系或更多信息，访问Repository](https://github.com/yycalm/linecount)
+[Repository](https://github.com/yycalm/linecount)
 
 
 # License
+
 MIT
 
 -----------------------------------------------------------------------------------------------------------
