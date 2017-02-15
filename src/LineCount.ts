@@ -207,8 +207,7 @@ export default class LineCount {
             if(quotes.hasOwnProperty('doublequotes'))doublequotes = quotes['doublequotes'];
             if(quotes.hasOwnProperty('singlequotes')) singlequotes = quotes['singlequotes'];
         }
-        //let continuationmark = sep['continuationmark'];
-
+ 
         let cmtlen={"line":0,"b1":0,"b2":0};
         if(sep.linecomment)cmtlen.line = sep.linecomment.length;
         if(block_enable){cmtlen.b1=sep.blockstart.length; cmtlen.b2 = sep.blockend.length;}
@@ -235,7 +234,7 @@ export default class LineCount {
                 }
                 result.comment+=comment;
                 if(i<text.length)i+=cmtlen.b2;
-                while(text.charAt(i) ===' ' || text.charAt(i) ==='\t' || text.charAt(i) ==='\r')i++;
+                while(i<text.length &&(text.charAt(i) ===' ' || text.charAt(i) ==='\t' || text.charAt(i) ==='\r'))i++;
                 newline = (text.charAt(i)==='\n' || comment>0);
            }
             else if(doublequotes && text.charAt(i)==='"'){ i++; while(i<text.length && text.charAt(i)!=='"'){if(text.charAt(i)==='\\')i++;i++;}}
@@ -246,7 +245,6 @@ export default class LineCount {
             }
             else if(newline){result.code++; newline = false; }
         }
-
         return result;
     }
 
@@ -352,6 +350,7 @@ export default class LineCount {
             let json = fs.readFileSync(filename, this.encoding);
             let reg1 = /\/\/.*/g;
             let reg2 = /\/\*[\s\S]*?\*\//g;
+            //删除注释
             let s1 = json.replace(reg2,(sub,offset,text)=>{
                 let isin = this.inString(text,offset);
                 if(isin) return  sub;
