@@ -17,7 +17,7 @@ The LineCount extension for Visual Studio Code counts and displays the lines of 
 
 * Count workspace files, you can custom the includes/excludes file pattern.
 
-* Support languages: c,cpp,java,js,ts,cs,sql,pas,perl,python(#,'''),ruby,vb('),html(<!--,-->),bat(::),sh(#),ini(;),fortran(!),m(%).
+* Support languages: c,cpp,java,js,ts,cs(`//,/*,*/`),sql(`--,/*,*/`),pas(`//,{*,*}`),perl(`#,=pod,=cut`),ruby(`#,=begin,=end`),python(`#,'''`),vb(`'`),html(`<!--,-->`),bat(`::`),sh(`#`),ini(`;`),fortran(`!`),m(`%`).
 
 * You can customize the comment symbol.
 
@@ -58,20 +58,23 @@ code .
   LineCount configuration examples：
 
 ```
+
+    "LineCount.showStatusBarItem": true,
+
     "LineCount.includes": [     
                         "**/*" 
-                        ]         
-    
+                        ],    
+
     "LineCount.excludes": [ 
                          "**/.vscode/**",
                         "**/node_modules/**"
-                        ]
+                        ],
 
     "LineCount.output": {
                          "txt": true,       
                         "json": true,       
                         "outdir":"out"      
-                        }
+                        },
 
     "LineCount.comment":[
                         {
@@ -86,6 +89,13 @@ code .
                                     "doublequotes": true,
                                     "singlequotes": true
                                 }                                
+                            }
+                        },
+                        {
+                            "ext": ["c","cpp","java"], 
+                            "separator": {             
+                                "blockstart": "<!--",    
+                                "blockend": "-->",      
                             }
                         }
                      ]
