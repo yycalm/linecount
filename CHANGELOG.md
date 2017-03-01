@@ -39,6 +39,12 @@ All notable changes to the "linecount" extension will be documented in this file
 1. add continuation linetol,blocktol, delete linestart.
 
 
+## Version 0.1.6 (2017-03-01)
+
+1. To determine whether the binary file.
+
+
+
 
 
 

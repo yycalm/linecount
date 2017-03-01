@@ -104,7 +104,7 @@ export default class LineCount {
         this.eol =  conf.get("eol","\r\n");
         this.encoding =  conf.get("encoding","utf8");
         if(this.encoding.toLowerCase() =="gbk"){
-            this.encoding="utf8";
+            this.encoding="utf8";   //node.js不支持gbk编码
         }
  
         this.outtype = conf.get("output",{"txt":true,"json":false,"outdir":"out"});
