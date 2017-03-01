@@ -88,11 +88,12 @@ export default class LineCount {
         this.builtinRule['for']={"linecomment":"!"};
         this.builtinRule['m']={"linecomment":"%"};
 
-        //this.getConfig();
+        //this.getConfig(); //初始化放在入口函数中
 
     }
 
     public getConfig(){
+        //vscode.window.showInformationMessage('getConfig!');
         
         if (!this.out) {
             this.out = vscode.window.createOutputChannel(this.EXTENSION_NAME);
@@ -108,7 +109,11 @@ export default class LineCount {
  
         this.outtype = conf.get("output",{"txt":true,"json":false,"outdir":"out"});
         this.outdir = conf.get("outdir","out").toString();
-        this.outpath =path.join(vscode.workspace.rootPath, this.outdir);       
+        if(!vscode.workspace.rootPath){
+            this.outpath = './'+this.outdir;
+        }else{
+            this.outpath =path.join(vscode.workspace.rootPath, this.outdir);       
+        }
 
         this.includes = "{"+conf.get("includes","*.*").toString()+"}";
         let s = conf.get("excludes","**/.vscode/**,**/node_modules/**").toString();
@@ -136,21 +141,23 @@ export default class LineCount {
  
     // Get the current lines count
     public countCurrentFile() {                 
-                
-         // Get the current text editor
+        // Get the current text editor
         let editor = vscode.window.activeTextEditor;
         if (!editor) {
-            //this.out.appendLine('The current file does not exist!');
-            vscode.window.showInformationMessage('No file open!');
+            vscode.window.showInformationMessage('No open file!');
             return;
         }
 
         let doc = editor.document;
         let rule = this.getRule(doc.fileName);
+
+        // let isbin = this.isBinaryFile(doc.fileName,doc.getText());
+        // this.out.appendLine(doc.fileName+' is binary file:'+isbin);
+
         
         let linenum = this.parseRule(doc.getText(), rule);
 
-         this.out.show();
+        this.out.show();
         this.out.appendLine(doc.fileName+' file lines count:');
         this.out.appendLine(`   code is ${linenum.code} `+(linenum.code>1?'lines.':'line.'));
         this.out.appendLine(`   comment is ${linenum.comment} `+(linenum.comment>1?'lines.':'line.'));
@@ -160,7 +167,7 @@ export default class LineCount {
 
     public countWorkspace() { 
         if(!vscode.workspace.rootPath){
-             vscode.window.showInformationMessage('No workspace open!');
+             vscode.window.showInformationMessage('No open workspace!');
              return;
         }
 
@@ -178,7 +185,11 @@ export default class LineCount {
                  fs.readFile(file.fsPath, this.encoding, (err, data)=>{   
                     if(err){
                         failnum++;
-                    }else {
+                    }else if(this.isBinaryFile(file.fsPath,data)){                        
+                        let fn=file.fsPath.replace(dir,"");
+                        let linenum = { filename:fn, isbinaryfile:true, blank: 0, code: 0, comment: 0};
+                        this.filelist.push(linenum);                                              
+                    }else{
                         let rule = this.getRule(file.fsPath);
                         let linenum = this.parseRule(data,rule);
                         //去掉前缀目录名
@@ -187,14 +198,43 @@ export default class LineCount {
                         total.code=total.code+linenum.code;
                         total.comment=total.comment+linenum.comment;
                         total.blank=total.blank+linenum.blank;
-                        if(this.filelist.length+failnum==files.length){
-                            this.outFile(total);    
-                        }
+                    }
+                    if(this.filelist.length+failnum==files.length){
+                        this.outFile(total);    
                     }
                 });            
             });
         });       
            
+    }
+
+    private isBinaryFile(filename:string,text:string):boolean{  
+        //判断扩展名是否定义
+        let ext = path.extname(filename).replace('.',"");
+        if(this.configRule.hasOwnProperty(ext) || this.builtinRule.hasOwnProperty(ext)){
+            return false;
+        }
+        
+        //判断文件bom头
+        let bom =[text.charCodeAt(0),text.charCodeAt(1),text.charCodeAt(2),text.charCodeAt(3)];
+        if((bom[0]==0xEF && bom[1]===0xBB && bom[2]==0xBF)   //UTF8
+        ||(bom[0]==0xFE && bom[1]==0xFF)    //UTF16 大端序
+        ||(bom[0]==0xFF && bom[1]==0xFE)    //UTF16 小端序
+        ||(bom[0]==0 && bom[1]==0 && bom[2]==0xFE && bom[3]==0xFF)  //UTF-32（大端序）
+        ||(bom[0]==0xFF && bom[1]==0xFE && bom[2]==0 && bom[3]==0)  //UTF-32（小端序）
+        ){
+            return false;
+        }
+        
+        //判断文件内容
+        let flag = 0;
+        for(let i=4; i<text.length && i<256; i++){
+            let cc = text.charCodeAt(i);
+            if(cc===9 || cc===10 || cc===13)continue;
+            else if(cc<32 || (cc>127 && cc<160)) flag++;
+            if(flag>2)break;
+        }
+        return flag>2;
     }
 
     //根据注释规则解析内容，返回行数对象
@@ -324,7 +364,11 @@ export default class LineCount {
                     for (var key in this.filelist) {
                         if (this.filelist.hasOwnProperty(key)) {
                             var obj = this.filelist[key];
-                            edit.insert(new vscode.Position(line++, 0), obj['filename']+", code is "+obj['code']+", comment is "+obj['comment']+ ", blank is "+obj['blank']+'.'+ this.eol);
+                            if(obj['isbinaryfile']){
+                                edit.insert(new vscode.Position(line++, 0), obj['filename']+", it is a binary file."+ this.eol);
+                            }else{
+                                edit.insert(new vscode.Position(line++, 0), obj['filename']+", code is "+obj['code']+", comment is "+obj['comment']+ ", blank is "+obj['blank']+'.'+ this.eol);
+                            }
                           
                         }
                     }
@@ -392,10 +436,10 @@ export default class LineCount {
 
         let item={"version":this.EXTENSION_VERSION,
                 "counttime":this.getDateTime(),
-                "filenum":this.filelist.length,
-                "codenum":total['code'],
-                "commentnum":total['comment'],
-                "blanknum":total['blank'],
+                "filesum":this.filelist.length,
+                "codesum":total['code'],
+                "commentsum":total['comment'],
+                "blanksum":total['blank'],
                 "filelist":[]
             };
 
