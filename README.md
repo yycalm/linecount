@@ -92,7 +92,7 @@ code .
                             }
                         },
                         {
-                            "ext": ["c","cpp","java"], 
+                            "ext": ["html"], 
                             "separator": {             
                                 "blockstart": "<!--",    
                                 "blockend": "-->",      
