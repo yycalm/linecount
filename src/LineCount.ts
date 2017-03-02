@@ -107,12 +107,11 @@ export default class LineCount {
             this.encoding="utf8";   //node.js不支持gbk编码
         }
  
-        this.outtype = conf.get("output",{"txt":true,"json":false,"outdir":"out"});
-        this.outdir = conf.get("outdir","out").toString();
+        this.outtype = conf.get("output",{"txt":true,"json":false,"outdir":"out"});        
         if(!vscode.workspace.rootPath){
-            this.outpath = './'+this.outdir;
+            this.outpath = './'+this.outtype.outdir;
         }else{
-            this.outpath =path.join(vscode.workspace.rootPath, this.outdir);       
+            this.outpath =path.join(vscode.workspace.rootPath, this.outtype.outdir);       
         }
 
         this.includes = "{"+conf.get("includes","*.*").toString()+"}";

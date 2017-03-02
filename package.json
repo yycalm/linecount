@@ -55,7 +55,12 @@
             "type": "object",
             "title": "LineCount configuration",
             "properties": {
-                "LineCount.includes": {
+                "LineCount.showStatusBarItem": {
+                    "type": "boolean",
+                    "default": true,                    
+                    "description": "Whether to show a 'LineCount' item in the status bar for launching the count."
+                },
+               "LineCount.includes": {
                     "type": "array",
                     "default": [
                         "**/*"
@@ -98,11 +103,6 @@
                         "outdir": "out"
                     },
                     "description": "Type of output file."
-                },
-                "LineCount.showStatusBarItem": {
-                    "type": "boolean",
-                    "default": true,                    
-                    "description": "Whether to show a 'LineCount' item in the status bar for launching the count."
                 }
             }
         }
