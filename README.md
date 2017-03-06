@@ -46,14 +46,14 @@ code .
 * `LineCount.output.txt`: (boolean | default `true`) Whether output to TXT file.
 * `LineCount.output.json`: (boolean | default `true`) Whether output to JSON file.
 * `LineCount.output.outdir`: (string | default `out`) output file path.
-* `LineCount.output.comment.ext`: (string array| required) file extension. if it`s "*", the rule for other files. default c style.
-* `LineCount.output.comment.separator.linecomment`: (string |default none) Single line comment symbol.
-* `LineCount.output.comment.separator.linetol`: (boolean |default `false`) Whether the line comment must be started on the line.
-* `LineCount.output.comment.separator.blockstart`: (string |default none) Block start comment symbol.
-* `LineCount.output.comment.separator.blockend`: (string |default none) Block end comment symbol.
-* `LineCount.output.comment.separator.blocktol`: (boolean |default `false`) Whether the block comment must be started on the line.
-* `LineCount.output.comment.separator.string.doublequotes`: (boolean |default `true`) String using double quotes.
-* `LineCount.output.comment.separator.string.singlequotes`: (boolean |default `true`) String using single quotes.
+* `LineCount.comment.ext`: (string array| required) file extension. if it`s "*", the rule for other files. default c style.
+* `LineCount.comment.separator.linecomment`: (string |default none) Single line comment symbol.
+* `LineCount.comment.separator.linetol`: (boolean |default `false`) Whether the line comment must be started on the line.
+* `LineCount.comment.separator.blockstart`: (string |default none) Block start comment symbol.
+* `LineCount.comment.separator.blockend`: (string |default none) Block end comment symbol.
+* `LineCount.comment.separator.blocktol`: (boolean |default `false`) Whether the block comment must be started on the line.
+* `LineCount.comment.separator.string.doublequotes`: (boolean |default `true`) String using double quotes.
+* `LineCount.comment.separator.string.singlequotes`: (boolean |default `true`) String using single quotes.
 
   LineCount configuration examples：
 
