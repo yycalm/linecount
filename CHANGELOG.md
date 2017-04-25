@@ -1,9 +1,29 @@
 # Change Log
 All notable changes to the "linecount" extension will be documented in this file.
 
+## Version 0.1.6 (2017-03-01)
 
-## Version 0.1.0 (2017-01-23)
-- Initial release
+1. To determine whether the binary file.
+
+## Version 0.1.5 (2017-02-14)
+
+1. add continuation linetol,blocktol, delete linestart.
+
+## Version 0.1.4 (2017-02-08)
+
+1. delete continuation mark.
+
+2. add string quotes config.
+
+3. add statusBarItem.
+
+## Version 0.1.3 (2017-02-05)
+
+- **Bug Fixes**
+
+1. Comment and blank lines for the wrong number.
+
+2. Exclude output file.
 
 ## Version 0.1.1 (2017-01-26)
 
@@ -15,37 +35,5 @@ All notable changes to the "linecount" extension will be documented in this file
 
 3. Add dependencies
 
-## Version 0.1.3 (2017-02-05)
-
-- **Bug Fixes**
-
-1. Comment and blank lines for the wrong number.
-
-2. Exclude output file.
-
-
-
-## Version 0.1.4 (2017-02-08)
-
-1. delete continuation mark.
-
-2. add string quotes config.
-
-3. add statusBarItem.
-
-
-## Version 0.1.5 (2017-02-14)
-
-1. add continuation linetol,blocktol, delete linestart.
-
-
-## Version 0.1.6 (2017-03-01)
-
-1. To determine whether the binary file.
-
-
-
-
-
-
-
+## Version 0.1.0 (2017-01-23)
+- Initial release
