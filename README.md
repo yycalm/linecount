@@ -21,7 +21,7 @@ The LineCount extension for Visual Studio Code counts and displays the lines of 
 
 * You can customize the comment symbol.
 
-* Line number information can be output to JSON, TXT file.
+* Line number information can be output to JSON, TXT, CSV, Markdown file.
 
 ## Installs
 
@@ -71,8 +71,10 @@ code .
                         ],
 
     "LineCount.output": {
-                         "txt": true,       
-                        "json": true,       
+                        "txt": true,       
+                        "json": true, 
+                        "csv": true, 
+                        "md": true,       
                         "outdir":"out"      
                         },
 
