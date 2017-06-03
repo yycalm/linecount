@@ -1,6 +1,5 @@
 
 import * as vscode from 'vscode';
-//import {Uri,TextDocument,Position} from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as util from './util';
@@ -12,8 +11,9 @@ export default class LineCount {
     private encoding: string;
     private includes: string;
     private excludes: string;
-    private outdir: string;
     private outpath: string;
+    private listsort: string;
+    private listorder: string;
     private outtype: any;
     private filelist: Array<Object>;
     private builtinRule: Array<Object>;
@@ -32,36 +32,17 @@ export default class LineCount {
         this.builtinRule = new Array();
         this.configRule = new Array();
 
-        this.EXTENSION_NAME = 'linecount';
-        this.EXTENSION_VERSION = '0.1.0';
-
         this.sepline2 = new Array(80).join("=");
         this.sepline1 = new Array(80).join("-");
 
-        console.log('vscode extensions num is ' + vscode.extensions.all.length);
-        for (var i = 0; i < vscode.extensions.all.length; i++) {
-            let ext = vscode.extensions.all[i];
-            if (ext.id == 'yycalm.linecount') {
-                // if(!ext.packageJSON.isBuiltin){
-                //     if(path.normalize(ext.extensionPath)==path.normalize(context.extensionPath)){
-                this.EXTENSION_NAME = ext.packageJSON.name;
-                this.EXTENSION_VERSION = ext.packageJSON.version;
-                break;
-                //     }
-            }
+        this.EXTENSION_NAME = 'linecount';
+        this.EXTENSION_VERSION = '0.1.7';
+
+        let ext = vscode.extensions.getExtension('yycalm.linecount');
+        if(ext!==undefined){
+            this.EXTENSION_NAME = ext.packageJSON.name;
+            this.EXTENSION_VERSION = ext.packageJSON.version;
         }
-        // let fname = path.join(context.extensionPath,"package.json");
-        // let data = fs.readFileSync(fname,"utf8");  
-        // fs.readFile(fname,"utf8",(err,data)=>{
-        //     if(err){
-        //         this.EXTENSION_NAME = "LineCount";
-        //         this.EXTENSION_VERSION = "0.0.1";                       
-        //     }else{
-        //         let pkg = JSON.parse(data);
-        //         this.EXTENSION_NAME = pkg.name;
-        //         this.EXTENSION_VERSION = pkg.version;           
-        //     }
-        // });       
 
         this.builtinRule.length = 0;
         let cstyle = { "linecomment": "//", "blockstart": "/*", "blockend": "*/", "string": { "doublequotes": true, "singlequotes": true } };
@@ -121,6 +102,9 @@ export default class LineCount {
         } else {
             this.outpath = path.join(vscode.workspace.rootPath, this.outtype.outdir);
         }
+
+        this.listsort = conf.get("sort", 'filename');
+        this.listorder = conf.get("order", 'asc');
 
         this.includes = "{" + conf.get("includes", "*.*").toString() + "}";
         let s = conf.get("excludes", "**/.vscode/**,**/node_modules/**").toString();
@@ -328,6 +312,47 @@ export default class LineCount {
         if (!fs.existsSync(this.outpath)) {
             fs.mkdirSync(this.outpath);
         }
+        
+       
+        //排序        
+        this.filelist.sort((a,b)=>{
+            if(this.listorder=='asc'){
+                if(this.listsort=='code'){
+                    return (a['code']-b['code']);
+                }else 
+                if(this.listsort=='comment'){
+                    return (a['comment']-b['comment']);
+                }else 
+                if(this.listsort=='blank'){
+                    return (a['blank']-b['blank']);
+                }else
+                if(this.listsort=='totalline'){
+                    return (a['code']+a['comment']+a['blank'])-(b['code']+b['comment']+b['blank']);
+                }else{
+                    if(a['filename'].toLowerCase()>b['filename'].toLowerCase())return 1;
+                    else if(a['filename'].toLowerCase()<b['filename'].toLowerCase())return -1;
+                    else return 0;
+                } 
+            }else{
+                if(this.listsort=='code'){
+                    return (b['code']-a['code']);
+                }else 
+                if(this.listsort=='comment'){
+                    return (b['comment']-a['comment']);
+                }else 
+                if(this.listsort=='blank'){
+                    return (b['blank']-a['blank']);
+                }else
+                if(this.listsort=='totalline'){
+                    return (b['code']+b['comment']+b['blank'])-(a['code']+a['comment']+a['blank']);
+                }else{
+                    if(b['filename'].toLowerCase() >a['filename'].toLowerCase())return 1;
+                    else if(b['filename'].toLowerCase()<a['filename'].toLowerCase())return -1;
+                    else return 0;
+                }                   
+            }
+        });
+    
 
         if (this.outtype.txt) {
             this.out_txt(total);
@@ -379,9 +404,21 @@ export default class LineCount {
 
         data.push(this.sepline2 + this.eol);
 
+        if (this.outtype.md){
+            fs.appendFile(filename, data.join(''), (err) => {
+                if (err) {
+                    this.out.appendLine("count output to txt file fail! " + filename);
+                } else {
+                    this.out.appendLine("count output to file : " + filename);
+                }
+            });
+            return;
+        }
+
         //open and view this file while write
         vscode.workspace.openTextDocument(filename).then((doc) => {
-            vscode.window.showTextDocument(doc, vscode.ViewColumn.One, true).then((e) => {
+            vscode.window.showTextDocument(doc, vscode.ViewColumn.One, true).then((e)=> {
+                
                 let startline = doc.lineCount;
                 let line = startline + 1;
                 e.edit(edit => {
@@ -397,7 +434,12 @@ export default class LineCount {
                 e.revealRange(new vscode.Range(startline, 0, startline + line, 0));
 
                 this.out.appendLine("count output to file : " + filename);
+                
+            },err=>{
+                this.out.appendLine("showTextDocument file fail: " + filename);
             });
+        },err=>{
+            this.out.appendLine("openTextDocument file fail: " + filename);
         });
     }
 
@@ -436,6 +478,7 @@ export default class LineCount {
                 }
             } catch (err) {
                 obj = undefined;
+                fs.renameSync(filename, util.getDateTime+filename+'.bak');
                 this.out.appendLine("read json file fail! " + filename);
             }
         }
@@ -485,14 +528,14 @@ export default class LineCount {
      * data may be surrounded with quotation(""), and sperate by comma(,) 
      * @param items 
      */
-    private csv_format(items: any[]) {
+    private csv_format(items: any[]):string {
         var data = "";
         for (var i = 0; i < items.length; i++) {
             //surrounded with "" to split field
             items[i] = "\"" + items[i] + "\"";
         };
         data = items.join(",");
-        data += this.eol;
+        //data += this.eol;
         return data;
     }
 
@@ -523,34 +566,6 @@ export default class LineCount {
     }
 
     /**
-     * write file to ouput data using fs
-     * @param filename 
-     * @param data 
-     */
-    private write_file(filename: string, data: any[]) {
-        let status = true;
-
-        //write to the file
-        for (var i = 0; i < data.length; i++) {
-            var element = data[i];
-            //append or replace write
-            fs.appendFile(filename, element, (err) => {
-                if (err) {
-                    status = false;
-                }
-            });
-        }
-
-        if (status) {
-            this.out.appendLine("count output to file : " + filename);
-        } else {
-            this.out.appendLine("count output to file : " + filename);
-        }
-
-        return status;
-    }
-
-    /**
      * for csv output, there may come a potential error while csv is opened by other applications.
      * @param total 
      */
@@ -558,14 +573,9 @@ export default class LineCount {
         let filename = path.join(this.outpath, this.EXTENSION_NAME + '.csv');
         console.log(filename);
 
-        // if (!fs.existsSync(filename)) {
-        //     let fd = fs.openSync(filename, 'w');
-        //     //fs.closeSync(fd);
-        // }
-
         //prepare data
         var data = [];
-        data.push(this.sepline2 + this.eol);
+        data.push(this.sepline2);
         data.push(this.csv_format(["EXTENSION NAME", this.EXTENSION_NAME]));
         data.push(this.csv_format(["EXTENSION VERSION", this.EXTENSION_VERSION]));
         data.push(this.sepline1 + this.eol);
@@ -594,8 +604,18 @@ export default class LineCount {
             }
         }
         data.push(this.sepline2 + this.eol);
+        data.push(this.eol);
 
-        this.write_file(filename, data);
+       
+        fs.appendFile(filename, data.join(this.eol),(err) => {
+            if (err) {
+                this.out.appendLine("count output to csv file fail! " + filename);
+            } else {
+                this.out.appendLine("count output to file : " + filename);
+            }
+        });
+
+        
     }
 
     /**
@@ -604,7 +624,7 @@ export default class LineCount {
      */
     private md_line_format(items: any[]) {
         let twospace = "  ";
-        var data = items.join(" - ") + twospace + this.eol;
+        var data = items.join(" - ") + twospace;
         return data;
     }
 
@@ -617,7 +637,7 @@ export default class LineCount {
     private md_table_format(items: any[]) {
         var data = "";
         data = items.join(" | ");
-        data = '|' + data + '|' + this.eol;
+        data = '|' + data + '|' ;
         return data;
     }
 
@@ -629,19 +649,12 @@ export default class LineCount {
         let filename = path.join(this.outpath, this.EXTENSION_NAME + '.md');
         console.log(filename);
 
-        // if (!fs.existsSync(filename)) {
-        //     let fd = fs.openSync(filename, 'w');
-        //     //fs.closeSync(fd);
-        // }
-
-        //prepare data
+         //prepare data
         var data = [];
-        data.push(this.sepline1 + this.eol);
-        data.push(this.eol);//md needed
+        data.push("***"+this.eol);
         data.push(this.md_line_format(["EXTENSION NAME", this.EXTENSION_NAME]));
         data.push(this.md_line_format(["EXTENSION VERSION", this.EXTENSION_VERSION]));
-        data.push(this.sepline1 + this.eol);
-        data.push(this.eol);//md needed
+        data.push(this.eol+"***"+this.eol);//md needed
         data.push(this.md_line_format(["count time", util.getDateTime()]));
         data.push(this.md_line_format(["count workspace", vscode.workspace.rootPath]));
         data.push(this.md_line_format(["total files", this.filelist.length.toString()]));
@@ -657,7 +670,7 @@ export default class LineCount {
         //must add a table header line in md
         var header = new Array(items.length).join("|----");
         header = "|----" + header + "|";
-        data.push(header + this.eol);
+        data.push(header);
 
         for (var key in this.filelist) {
             if (this.filelist.hasOwnProperty(key)) {
@@ -671,14 +684,19 @@ export default class LineCount {
                 }
             }
         }
-        data.push(this.sepline1 + this.eol);
-        data.push(this.eol);//md needed
-
-        this.write_file(filename, data);
+        data.push( "|||||" + this.eol);
+        data.push("***" + this.eol);
+        data.push(this.eol);
+       
+        
+        fs.writeFileSync(filename, data.join(this.eol));
+        
+        this.out.appendLine("count output to file : " + filename);
 
         //do not show file, but preview the markdown
         let uri = vscode.Uri.parse('file:///' + filename);
-        let success = vscode.commands.executeCommand("markdown.showPreviewToSide", uri);
+        let success = vscode.commands.executeCommand("markdown.showPreview", uri);
+
     }
 
     dispose() {  //实现dispose方法

@@ -9,4 +9,6 @@ tsconfig.json
 images/*.gif
 **/linecount.txt
 **/linecount.json
+**/linecount.csv
+**/linecount.md
 

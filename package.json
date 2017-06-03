@@ -2,7 +2,7 @@
     "name": "linecount",
     "displayName": "LineCount",
     "description": "Count the lines of code.",
-    "version": "0.1.6",
+    "version": "0.1.7",
     "publisher": "yycalm",
     "icon": "images/counticon.png",
     "author": {
@@ -57,10 +57,10 @@
             "properties": {
                 "LineCount.showStatusBarItem": {
                     "type": "boolean",
-                    "default": true,                    
+                    "default": true,
                     "description": "Whether to show a 'LineCount' item in the status bar for launching the count."
                 },
-               "LineCount.includes": {
+                "LineCount.includes": {
                     "type": "array",
                     "default": [
                         "**/*"
@@ -79,20 +79,23 @@
                     "type": "array",
                     "default": [
                         {
-                            "ext": [ "c","cpp" ],
+                            "ext": [
+                                "c",
+                                "cpp"
+                            ],
                             "separator": {
                                 "linecomment": "//",
                                 "linetol": false,
                                 "blockstart": "/*",
                                 "blockend": "*/",
-                                "blocktol":false,
-                                "string":{
+                                "blocktol": false,
+                                "string": {
                                     "doublequotes": true,
                                     "singlequotes": true
-                                    }
-                             }
+                                }
+                            }
                         }
-                     ],
+                    ],
                     "description": "Define a document's comment."
                 },
                 "LineCount.output": {
@@ -105,6 +108,27 @@
                         "outdir": "out"
                     },
                     "description": "Type of output file."
+                },
+                "LineCount.sort": {
+                    "type": "string",
+                    "enum": [
+                        "filename",
+                        "code",
+                        "comment",
+                        "blank",
+                        "totalline"
+                    ],
+                    "default": "filename",
+                    "description": "Specifies the sort field."
+                },
+                "LineCount.order": {
+                    "type": "string",
+                    "enum": [
+                        "asc",
+                        "desc"
+                    ],
+                    "default": "asc",
+                    "description": "Specify ascending or descending order."
                 }
             }
         }
