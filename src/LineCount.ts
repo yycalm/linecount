@@ -733,7 +733,8 @@ export default class LineCount {
 
     // prepare data
     var data = [];
-    data.push('***' + this.eol);
+    data.push(`# Line Count${this.eol}`);
+    data.push(`***${this.eol}`);
     data.push(
       this.md_line_format({
         label: 'EXTENSION NAME',
@@ -773,6 +774,7 @@ export default class LineCount {
     data.push(this.md_line_format({ label: 'Blank Lines', value: total['blank'] }));
     data.push(this.eol);
 
+    data.push('## Breakdown');
     let items = ['Filename', 'Code', 'Comment', 'Blank'];
     data.push(this.md_table_format(items));
 
