@@ -483,8 +483,7 @@ export default class LineCount {
       this.eol,
     ];
 
-    Object.keys(this.filelist).forEach(key => {
-      const obj = this.filelist[key];
+    this.filelist.forEach(obj => {
       if (obj['isbinaryfile']) {
         data.push(`${obj['filename']} is a binary file.${this.eol}`);
       } else {
@@ -642,11 +641,11 @@ export default class LineCount {
       vscode.window
         .showTextDocument(doc, vscode.ViewColumn.One, true)
         .then(({ edit, document, revealRange }) => {
-          edit(editor => {
+          edit(editor =>
             data.forEach(element =>
               editor.insert(new vscode.Position(line++, 0), element)
-            );
-          });
+            )
+          );
 
           document.save();
           revealRange(new vscode.Range(startline, 0, startline + line, 0));
@@ -677,11 +676,9 @@ export default class LineCount {
       this.eol,
     ];
 
-    const header = ['filename', 'code', 'comment', 'blank'];
-    data.push(this.csv_format(header));
+    data.push('filename,code,comment,blank');
 
-    Object.keys(this.filelist).forEach(key => {
-      const obj = this.filelist[key];
+    this.filelist.forEach(obj => {
       if (obj['isbinaryfile']) {
         data.push(this.csv_format([obj['filename'], 'binary file']));
       } else {
