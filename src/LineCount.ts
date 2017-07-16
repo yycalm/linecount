@@ -148,19 +148,15 @@ export default class LineCount {
 
     this.configRule.length = 0;
     let comment = conf.get('comment');
-    for (var key in comment) {
-      if (comment.hasOwnProperty(key)) {
-        var element = comment[key];
-        var extlist = element['ext'];
 
-        for (var ext in extlist) {
-          if (extlist.hasOwnProperty(ext)) {
-            var extname = extlist[ext];
-            this.configRule[extname] = element['separator'];
-          }
-        }
-      }
-    }
+    Object.keys(comment).forEach(key => {
+      const element = comment[key];
+      const extlist = element['ext'];
+
+      Object.keys(extlist).forEach(
+        ext => (this.configRule[extlist[ext]] = element['separator'])
+      );
+    });
   }
 
   // Get the current lines count
@@ -302,7 +298,7 @@ export default class LineCount {
     let result = { blank: 0, code: 0, comment: 0 };
     let newline: boolean = true;
 
-    for (var i = 0; i < text.length; i++) {
+    for (let i = 0; i < text.length; i++) {
       if (
         text.charAt(i) === ' ' ||
         text.charAt(i) === '\t' ||
@@ -473,7 +469,7 @@ export default class LineCount {
     }
 
     // prepare data
-    var data = [
+    const data = [
       this.sepline2 + this.eol,
       'EXTENSION NAME : ' + this.EXTENSION_NAME + this.eol,
       'EXTENSION VERSION : ' + this.EXTENSION_VERSION + this.eol,
@@ -740,7 +736,7 @@ export default class LineCount {
     console.log(filename);
 
     // prepare data
-    var data = [
+    const data = [
       `# Line Count${this.eol}`,
       `***${this.eol}`,
       this.md_line_format({
@@ -786,7 +782,7 @@ export default class LineCount {
     data.push(this.md_table_format(items));
 
     // must add a table header line in md
-    var header = new Array(items.length).join('|----');
+    const header = new Array(items.length).join('|----');
     data.push(`|----${header}|`);
 
     this.filelist.forEach(obj => {
