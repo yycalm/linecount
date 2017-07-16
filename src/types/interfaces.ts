@@ -8,4 +8,5 @@ interface CountResult {
   code: number;
   comment: number;
   filename?: string;
+  isbinaryfile?: boolean;
 }
