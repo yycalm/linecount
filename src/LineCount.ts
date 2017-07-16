@@ -183,16 +183,11 @@ export default class LineCount {
 
     this.out.show();
     this.out.appendLine(doc.fileName + ' file lines count:');
+    this.out.appendLine(`   code is ${linenum.code} ` + (linenum.code > 1 ? 'lines.' : 'line.'));
     this.out.appendLine(
-      `   code is ${linenum.code} ` + (linenum.code > 1 ? 'lines.' : 'line.')
+      `   comment is ${linenum.comment} ` + (linenum.comment > 1 ? 'lines.' : 'line.')
     );
-    this.out.appendLine(
-      `   comment is ${linenum.comment} ` +
-        (linenum.comment > 1 ? 'lines.' : 'line.')
-    );
-    this.out.appendLine(
-      `   blank is ${linenum.blank} ` + (linenum.blank > 1 ? 'lines.' : 'line.')
-    );
+    this.out.appendLine(`   blank is ${linenum.blank} ` + (linenum.blank > 1 ? 'lines.' : 'line.'));
   }
 
   public countWorkspace() {
@@ -244,20 +239,12 @@ export default class LineCount {
   private isBinaryFile(filename: string, text: string): boolean {
     // 判断扩展名是否定义
     let ext = path.extname(filename).replace('.', '');
-    if (
-      this.configRule.hasOwnProperty(ext) ||
-      this.builtinRule.hasOwnProperty(ext)
-    ) {
+    if (this.configRule.hasOwnProperty(ext) || this.builtinRule.hasOwnProperty(ext)) {
       return false;
     }
 
     // 判断文件bom头
-    let bom = [
-      text.charCodeAt(0),
-      text.charCodeAt(1),
-      text.charCodeAt(2),
-      text.charCodeAt(3),
-    ];
+    let bom = [text.charCodeAt(0), text.charCodeAt(1), text.charCodeAt(2), text.charCodeAt(3)];
     if (
       (bom[0] == 0xef && bom[1] === 0xbb && bom[2] == 0xbf) || //UTF8
       (bom[0] == 0xfe && bom[1] == 0xff) || //UTF16 大端序
@@ -290,10 +277,8 @@ export default class LineCount {
     let singlequotes: boolean = true;
     if (sep.hasOwnProperty('string')) {
       let quotes = sep['string'];
-      if (quotes.hasOwnProperty('doublequotes'))
-        doublequotes = quotes['doublequotes'];
-      if (quotes.hasOwnProperty('singlequotes'))
-        singlequotes = quotes['singlequotes'];
+      if (quotes.hasOwnProperty('doublequotes')) doublequotes = quotes['doublequotes'];
+      if (quotes.hasOwnProperty('singlequotes')) singlequotes = quotes['singlequotes'];
     }
 
     let cmtlen = { line: 0, b1: 0, b2: 0 };
@@ -307,12 +292,7 @@ export default class LineCount {
     let newline: boolean = true;
 
     for (var i = 0; i < text.length; i++) {
-      if (
-        text.charAt(i) === ' ' ||
-        text.charAt(i) === '\t' ||
-        text.charAt(i) === '\r'
-      )
-        continue;
+      if (text.charAt(i) === ' ' || text.charAt(i) === '\t' || text.charAt(i) === '\r') continue;
       else if (sep.linecomment && text.substr(i, cmtlen.line) === sep.linecomment) {
         if (!sep.linetol || newline) {
           result.comment++;
@@ -336,9 +316,7 @@ export default class LineCount {
         if (i < text.length) i += cmtlen.b2;
         while (
           i < text.length &&
-          (text.charAt(i) === ' ' ||
-            text.charAt(i) === '\t' ||
-            text.charAt(i) === '\r')
+          (text.charAt(i) === ' ' || text.charAt(i) === '\t' || text.charAt(i) === '\r')
         )
           i++;
         newline = text.charAt(i) === '\n' || comment > 0;
@@ -404,16 +382,10 @@ export default class LineCount {
         } else if (this.listsort == 'blank') {
           return a['blank'] - b['blank'];
         } else if (this.listsort == 'totalline') {
-          return (
-            a['code'] +
-            a['comment'] +
-            a['blank'] -
-            (b['code'] + b['comment'] + b['blank'])
-          );
+          return a['code'] + a['comment'] + a['blank'] - (b['code'] + b['comment'] + b['blank']);
         } else {
           if (a['filename'].toLowerCase() > b['filename'].toLowerCase()) return 1;
-          else if (a['filename'].toLowerCase() < b['filename'].toLowerCase())
-            return -1;
+          else if (a['filename'].toLowerCase() < b['filename'].toLowerCase()) return -1;
           else return 0;
         }
       } else {
@@ -424,16 +396,10 @@ export default class LineCount {
         } else if (this.listsort == 'blank') {
           return b['blank'] - a['blank'];
         } else if (this.listsort == 'totalline') {
-          return (
-            b['code'] +
-            b['comment'] +
-            b['blank'] -
-            (a['code'] + a['comment'] + a['blank'])
-          );
+          return b['code'] + b['comment'] + b['blank'] - (a['code'] + a['comment'] + a['blank']);
         } else {
           if (b['filename'].toLowerCase() > a['filename'].toLowerCase()) return 1;
-          else if (b['filename'].toLowerCase() < a['filename'].toLowerCase())
-            return -1;
+          else if (b['filename'].toLowerCase() < a['filename'].toLowerCase()) return -1;
           else return 0;
         }
       }
@@ -768,9 +734,7 @@ export default class LineCount {
     );
     data.push('## TOTALS');
     data.push(this.md_line_format({ label: 'Code Lines', value: total['code'] }));
-    data.push(
-      this.md_line_format({ label: 'Comment Lines', value: total['comment'] })
-    );
+    data.push(this.md_line_format({ label: 'Comment Lines', value: total['comment'] }));
     data.push(this.md_line_format({ label: 'Blank Lines', value: total['blank'] }));
     data.push(this.eol);
 
@@ -780,7 +744,7 @@ export default class LineCount {
 
     // must add a table header line in md
     var header = new Array(items.length).join('|----');
-    data.push(`|${header}|`);
+    data.push(`|----${header}|`);
 
     for (var key in this.filelist) {
       if (this.filelist.hasOwnProperty(key)) {
