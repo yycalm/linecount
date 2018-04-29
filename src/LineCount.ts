@@ -130,6 +130,13 @@ export default class LineCount {
 
     }
 
+    private shouldCreateOutPath() {
+        if (this.outtype.txt || this.outtype.json || this.outtype.csv || this.outtype.md) {
+            return !fs.existsSync(this.outpath);
+        }
+        return false;
+    }
+
     // Get the current lines count
     public countCurrentFile() {
         // Get the current text editor
@@ -309,7 +316,7 @@ export default class LineCount {
         this.out.appendLine("   total comment lines : " + total['comment']);
         this.out.appendLine("   total blank lines : " + total['blank']);
 
-        if (!fs.existsSync(this.outpath)) {
+        if (this.shouldCreateOutPath()) {
             fs.mkdirSync(this.outpath);
         }
         
