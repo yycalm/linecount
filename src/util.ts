@@ -50,3 +50,9 @@ export function getDateTime(): string {
         + " " + shour + seperator2 + sminutes + seperator2 + sseconds;
     return currentdate;
 }
+// temporary pad start function, es2017 has support padStart, padEnd
+export function pad(num: any, size: number): string {
+    let s = num + "";
+    while (s.length < size) s = " " + s;
+    return s;
+}
