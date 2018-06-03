@@ -6,7 +6,7 @@ import * as util from './util';
 
 export default class LineCount {
 
-    private out: any;
+    private out: vscode.OutputChannel;
     private eol: string;
     private encoding: string;
     private includes: string;
@@ -210,14 +210,12 @@ export default class LineCount {
     // add or update language details to dictionary
     private updateLanguages(ext: string, total: any, linenum: any) {
         let old = total.languages[ext];
-        let data = { code: 0, comment: 0, blank: 0 }
+        let data = { code: linenum.code, comment: linenum.comment, blank: linenum.blank }
+
         if (old !== undefined) {
-            data.code = linenum.code + old.code;
-            data.comment = linenum.comment + old.comment;
-            data.blank = linenum.blank + old.blank;
-        }
-        else {
-            data = linenum;
+            data.code += old.code;
+            data.comment += old.comment;
+            data.blank += old.blank;
         }
 
         total.languages[ext] = data;
@@ -325,6 +323,7 @@ export default class LineCount {
         }
     }
 
+
     private outFile(total: any) {
         this.out.show();
         this.out.appendLine(vscode.workspace.rootPath + " workspace lines count: ");
@@ -332,7 +331,7 @@ export default class LineCount {
         this.out.appendLine("   total code lines : " + total['code']);
         this.out.appendLine("   total comment lines : " + total['comment']);
         this.out.appendLine("   total blank lines : " + total['blank']);
-
+        
         // write the language details to output 
         if (this.outtype["languageDetails"] === true) {
             let header = `|${util.pad("extension", 15)}|${util.pad('total code', 15)}|${util.pad("total comment", 15)}|${util.pad("total blank", 15)}|${util.pad("percent", 7)}|`;
@@ -342,12 +341,8 @@ export default class LineCount {
                 let value = total.languages[key];
                 let percent = ((value['code'] / total['code']) * 100).toPrecision(2);
                 this.out.appendLine(`   |${util.pad(key, 15)}|${util.pad(value['code'], 15)}|${util.pad(value['comment'], 15)}|${util.pad(value['blank'], 15)}|${util.pad(percent, 7)}|`);
-
-                //this.out.appendLine("       language " + key + " total code, comment and blank lines : " + value['code'] + ", " + value['comment'] + ", " + value['blank']);
             }
         }
-
-
 
         if (!fs.existsSync(this.outpath)) {
             fs.mkdirSync(this.outpath);
@@ -430,6 +425,21 @@ export default class LineCount {
         data.push("total comment lines : " + total['comment'] + this.eol);
         data.push("total blank lines : " + total['blank'] + this.eol);
         data.push(this.eol);
+
+
+
+        // write the language details to output 
+        if (this.outtype["languageDetails"] === true) {
+            let header = `|${util.pad("extension", 15)}|${util.pad('total code', 15)}|${util.pad("total comment", 15)}|${util.pad("total blank", 15)}|${util.pad("percent", 7)}|`;
+            data.push('   ' + header + this.eol);
+            data.push('   ' + '-'.repeat(header.length) + this.eol)
+            for (let key in total.languages) {
+                let value = total.languages[key];
+                let percent = ((value['code'] / total['code']) * 100).toPrecision(2);
+                data.push(`   |${util.pad(key, 15)}|${util.pad(value['code'], 15)}|${util.pad(value['comment'], 15)}|${util.pad(value['blank'], 15)}|${util.pad(percent, 7)}|` + this.eol);
+            }
+            data.push('   ' + '-'.repeat(header.length) + this.eol)
+        }
 
         for (var key in this.filelist) {
             if (this.filelist.hasOwnProperty(key)) {
@@ -539,6 +549,7 @@ export default class LineCount {
             "codesum": total['code'],
             "commentsum": total['comment'],
             "blanksum": total['blank'],
+            "languageDetails": total['languages'],
             "filelist": []
         };
 
@@ -627,6 +638,21 @@ export default class LineCount {
         data.push(this.csv_format(["total blank lines", total['blank']]));
         data.push(this.eol);
 
+        // write the language details to output 
+        if (this.outtype["languageDetails"] === true) {
+            data.push(this.sepline1);
+            data.push(this.csv_format(["language details"]))
+            data.push(this.csv_format(['extension', 'total code', 'total comment', 'total blank', 'percent']));
+            for (let key in total.languages) {
+                let value = total.languages[key];
+                let percent = ((value['code'] / total['code']) * 100).toPrecision(2);
+
+                data.push(this.csv_format([key, value['code'], value['comment'], value['blank'], percent]));
+            }
+            
+            data.push(this.sepline1 + this.eol);
+        }
+
         var items = [];
         items = ['filename', 'code', 'comment', 'blank'];
         data.push(this.csv_format(items));
@@ -702,6 +728,27 @@ export default class LineCount {
         data.push(this.md_line_format(["total comment lines", total['comment']]));
         data.push(this.md_line_format(["total blank lines", total['blank']]));
         data.push(this.eol);
+
+        // write the language details to output 
+        if (this.outtype["languageDetails"] === true) {
+            let languageItems = ['extension', 'total code', 'total comment', 'total blank', 'percent'];
+            data.push(this.md_table_format(languageItems));
+
+            var header = new Array(languageItems.length).join("|----");
+            header = "|----" + header + "|";
+            data.push(header);
+
+            for (let key in total.languages) {
+                let value = total.languages[key];
+                let percent = ((value['code'] / total['code']) * 100).toPrecision(2);
+                data.push(this.md_table_format([key, value['code'], value['comment'], value['blank'], percent]));
+            }
+            
+            data.push("|||||" + this.eol);
+            data.push("***" + this.eol);
+            data.push(this.eol);
+        }
+
 
         var items = [];
         items = ['filename', 'code', 'comment', 'blank'];
