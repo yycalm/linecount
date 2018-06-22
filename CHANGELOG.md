@@ -1,5 +1,17 @@
 # Change Log
-All notable changes to the "linecount" extension will be documented in this file.
+All notable changes to the "linecounter" extension will be documented in this file.
+
+## Version 0.1.9 (2018-06-22)
+
+1. Fixing getExtension
+
+
+## Version 0.1.8 (2018-06-22)
+
+1. A feature now calculating language details with respect to file extensions.
+
+2. A new boolean setting "languageDetails" added to "LineCount.output"
+
 
 ## Version 0.1.7 (2017-06-03)
 

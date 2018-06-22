@@ -1,9 +1,9 @@
 {
-    "name": "linecount",
-    "displayName": "LineCount",
+    "name": "linecounter",
+    "displayName": "LineCounter",
     "description": "Count the lines of code.",
-    "version": "0.1.7",
-    "publisher": "yycalm",
+    "version": "0.1.9",
+    "publisher": "lyzerk",
     "icon": "images/counticon.png",
     "author": {
         "name": "yycalm",
@@ -12,18 +12,18 @@
     },
     "license": "SEE LICENSE IN LICENSE.md",
     "bugs": {
-        "url": "https://github.com/yycalm/linecount/issues",
+        "url": "https://github.com/lyzerk/vscode-linecounter/issues",
         "email": "yycalm@qq.com"
     },
-    "homepage": "https://github.com/yycalm/linecount",
+    "homepage": "https://github.com/lyzerk/vscode-linecounter",
     "repository": {
         "type": "git",
-        "url": "https://github.com/yycalm/linecount.git"
+        "url": "https://github.com/lyzerk/vscode-linecounter.git"
     },
     "keywords": [
         "linecount",
         "line",
-        "count",
+        "counter",
         "codeline",
         "codecount"
     ],

@@ -6,7 +6,7 @@ import * as util from './util';
 
 export default class LineCount {
 
-    private out: any;
+    private out: vscode.OutputChannel;
     private eol: string;
     private encoding: string;
     private includes: string;
@@ -38,8 +38,8 @@ export default class LineCount {
         this.EXTENSION_NAME = 'linecount';
         this.EXTENSION_VERSION = '0.1.7';
 
-        let ext = vscode.extensions.getExtension('yycalm.linecount');
-        if(ext!==undefined){
+        let ext = vscode.extensions.getExtension('lyzerk.linecounter');
+        if (ext !== undefined) {
             this.EXTENSION_NAME = ext.packageJSON.name;
             this.EXTENSION_VERSION = ext.packageJSON.version;
         }
@@ -96,7 +96,7 @@ export default class LineCount {
             this.encoding = "utf8";   //node.js不支持gbk编码
         }
 
-        this.outtype = conf.get("output", { "txt": true, "json": false, "csv": false, "md": false, "outdir": "out" });
+        this.outtype = conf.get("output", { "txt": true, "json": false, "csv": false, "md": false, "outdir": "out", "languageDetails": true });
         if (!vscode.workspace.rootPath) {
             this.outpath = './' + this.outtype.outdir;
         } else {
@@ -167,7 +167,8 @@ export default class LineCount {
         let failnum = 0;
         this.filelist.length = 0;
         //this.filelist.splice(0,this.filelist.length);
-        let total = { files: 0, code: 0, comment: 0, blank: 0 };
+        let map: { [extension: string]: number; } = {};
+        let total = { files: 0, code: 0, comment: 0, blank: 0, languages: map };
 
         let ff = vscode.workspace.findFiles(this.includes, this.excludes);
         ff.then((files: vscode.Uri[]) => {
@@ -183,6 +184,12 @@ export default class LineCount {
                     } else {
                         let rule = this.getRule(file.fsPath);
                         let linenum = this.parseRule(data, rule);
+                        // collect language details
+                        if (this.outtype["languageDetails"] === true) {
+                            let ext = path.extname(file.fsPath);
+                            this.updateLanguages(ext, total, linenum);
+                        }
+
                         //去掉前缀目录名
                         linenum.filename = file.fsPath.replace(dir, "");
                         this.filelist.push(linenum);
@@ -190,6 +197,7 @@ export default class LineCount {
                         total.comment = total.comment + linenum.comment;
                         total.blank = total.blank + linenum.blank;
                     }
+
                     if (this.filelist.length + failnum == files.length) {
                         this.outFile(total);
                     }
@@ -197,6 +205,20 @@ export default class LineCount {
             });
         });
 
+    }
+
+    // add or update language details to dictionary
+    private updateLanguages(ext: string, total: any, linenum: any) {
+        let old = total.languages[ext];
+        let data = { code: linenum.code, comment: linenum.comment, blank: linenum.blank }
+
+        if (old !== undefined) {
+            data.code += old.code;
+            data.comment += old.comment;
+            data.blank += old.blank;
+        }
+
+        total.languages[ext] = data;
     }
 
     private isBinaryFile(filename: string, text: string): boolean {
@@ -301,6 +323,7 @@ export default class LineCount {
         }
     }
 
+
     private outFile(total: any) {
         this.out.show();
         this.out.appendLine(vscode.workspace.rootPath + " workspace lines count: ");
@@ -308,51 +331,63 @@ export default class LineCount {
         this.out.appendLine("   total code lines : " + total['code']);
         this.out.appendLine("   total comment lines : " + total['comment']);
         this.out.appendLine("   total blank lines : " + total['blank']);
+        
+        // write the language details to output 
+        if (this.outtype["languageDetails"] === true) {
+            let header = `|${util.pad("extension", 15)}|${util.pad('total code', 15)}|${util.pad("total comment", 15)}|${util.pad("total blank", 15)}|${util.pad("percent", 7)}|`;
+            this.out.appendLine('   ' + header);
+            this.out.appendLine('   ' + '-'.repeat(header.length))
+            for (let key in total.languages) {
+                let value = total.languages[key];
+                let percent = ((value['code'] / total['code']) * 100).toPrecision(2);
+                this.out.appendLine(`   |${util.pad(key, 15)}|${util.pad(value['code'], 15)}|${util.pad(value['comment'], 15)}|${util.pad(value['blank'], 15)}|${util.pad(percent, 7)}|`);
+            }
+        }
 
         if (!fs.existsSync(this.outpath)) {
             fs.mkdirSync(this.outpath);
         }
-        
-       
+
+
         //排序        
-        this.filelist.sort((a,b)=>{
-            if(this.listorder=='asc'){
-                if(this.listsort=='code'){
-                    return (a['code']-b['code']);
-                }else 
-                if(this.listsort=='comment'){
-                    return (a['comment']-b['comment']);
-                }else 
-                if(this.listsort=='blank'){
-                    return (a['blank']-b['blank']);
-                }else
-                if(this.listsort=='totalline'){
-                    return (a['code']+a['comment']+a['blank'])-(b['code']+b['comment']+b['blank']);
-                }else{
-                    if(a['filename'].toLowerCase()>b['filename'].toLowerCase())return 1;
-                    else if(a['filename'].toLowerCase()<b['filename'].toLowerCase())return -1;
-                    else return 0;
-                } 
-            }else{
-                if(this.listsort=='code'){
-                    return (b['code']-a['code']);
-                }else 
-                if(this.listsort=='comment'){
-                    return (b['comment']-a['comment']);
-                }else 
-                if(this.listsort=='blank'){
-                    return (b['blank']-a['blank']);
-                }else
-                if(this.listsort=='totalline'){
-                    return (b['code']+b['comment']+b['blank'])-(a['code']+a['comment']+a['blank']);
-                }else{
-                    if(b['filename'].toLowerCase() >a['filename'].toLowerCase())return 1;
-                    else if(b['filename'].toLowerCase()<a['filename'].toLowerCase())return -1;
-                    else return 0;
-                }                   
+        this.filelist.sort((a, b) => {
+            if (this.listorder == 'asc') {
+                if (this.listsort == 'code') {
+                    return (a['code'] - b['code']);
+                } else
+                    if (this.listsort == 'comment') {
+                        return (a['comment'] - b['comment']);
+                    } else
+                        if (this.listsort == 'blank') {
+                            return (a['blank'] - b['blank']);
+                        } else
+                            if (this.listsort == 'totalline') {
+                                return (a['code'] + a['comment'] + a['blank']) - (b['code'] + b['comment'] + b['blank']);
+                            } else {
+                                if (a['filename'].toLowerCase() > b['filename'].toLowerCase()) return 1;
+                                else if (a['filename'].toLowerCase() < b['filename'].toLowerCase()) return -1;
+                                else return 0;
+                            }
+            } else {
+                if (this.listsort == 'code') {
+                    return (b['code'] - a['code']);
+                } else
+                    if (this.listsort == 'comment') {
+                        return (b['comment'] - a['comment']);
+                    } else
+                        if (this.listsort == 'blank') {
+                            return (b['blank'] - a['blank']);
+                        } else
+                            if (this.listsort == 'totalline') {
+                                return (b['code'] + b['comment'] + b['blank']) - (a['code'] + a['comment'] + a['blank']);
+                            } else {
+                                if (b['filename'].toLowerCase() > a['filename'].toLowerCase()) return 1;
+                                else if (b['filename'].toLowerCase() < a['filename'].toLowerCase()) return -1;
+                                else return 0;
+                            }
             }
         });
-    
+
 
         if (this.outtype.txt) {
             this.out_txt(total);
@@ -391,6 +426,21 @@ export default class LineCount {
         data.push("total blank lines : " + total['blank'] + this.eol);
         data.push(this.eol);
 
+
+
+        // write the language details to output 
+        if (this.outtype["languageDetails"] === true) {
+            let header = `|${util.pad("extension", 15)}|${util.pad('total code', 15)}|${util.pad("total comment", 15)}|${util.pad("total blank", 15)}|${util.pad("percent", 7)}|`;
+            data.push('   ' + header + this.eol);
+            data.push('   ' + '-'.repeat(header.length) + this.eol)
+            for (let key in total.languages) {
+                let value = total.languages[key];
+                let percent = ((value['code'] / total['code']) * 100).toPrecision(2);
+                data.push(`   |${util.pad(key, 15)}|${util.pad(value['code'], 15)}|${util.pad(value['comment'], 15)}|${util.pad(value['blank'], 15)}|${util.pad(percent, 7)}|` + this.eol);
+            }
+            data.push('   ' + '-'.repeat(header.length) + this.eol)
+        }
+
         for (var key in this.filelist) {
             if (this.filelist.hasOwnProperty(key)) {
                 var obj = this.filelist[key];
@@ -404,7 +454,7 @@ export default class LineCount {
 
         data.push(this.sepline2 + this.eol);
 
-        if (this.outtype.md){
+        if (this.outtype.md) {
             fs.appendFile(filename, data.join(''), (err) => {
                 if (err) {
                     this.out.appendLine("count output to txt file fail! " + filename);
@@ -417,8 +467,8 @@ export default class LineCount {
 
         //open and view this file while write
         vscode.workspace.openTextDocument(filename).then((doc) => {
-            vscode.window.showTextDocument(doc, vscode.ViewColumn.One, true).then((e)=> {
-                
+            vscode.window.showTextDocument(doc, vscode.ViewColumn.One, true).then((e) => {
+
                 let startline = doc.lineCount;
                 let line = startline + 1;
                 e.edit(edit => {
@@ -434,11 +484,11 @@ export default class LineCount {
                 e.revealRange(new vscode.Range(startline, 0, startline + line, 0));
 
                 this.out.appendLine("count output to file : " + filename);
-                
-            },err=>{
+
+            }, err => {
                 this.out.appendLine("showTextDocument file fail: " + filename);
             });
-        },err=>{
+        }, err => {
             this.out.appendLine("openTextDocument file fail: " + filename);
         });
     }
@@ -478,7 +528,7 @@ export default class LineCount {
                 }
             } catch (err) {
                 obj = undefined;
-                fs.renameSync(filename, util.getDateTime+filename+'.bak');
+                fs.renameSync(filename, util.getDateTime + filename + '.bak');
                 this.out.appendLine("read json file fail! " + filename);
             }
         }
@@ -499,6 +549,7 @@ export default class LineCount {
             "codesum": total['code'],
             "commentsum": total['comment'],
             "blanksum": total['blank'],
+            "languageDetails": total['languages'],
             "filelist": []
         };
 
@@ -528,7 +579,7 @@ export default class LineCount {
      * data may be surrounded with quotation(""), and sperate by comma(,) 
      * @param items 
      */
-    private csv_format(items: any[]):string {
+    private csv_format(items: any[]): string {
         var data = "";
         for (var i = 0; i < items.length; i++) {
             //surrounded with "" to split field
@@ -587,6 +638,21 @@ export default class LineCount {
         data.push(this.csv_format(["total blank lines", total['blank']]));
         data.push(this.eol);
 
+        // write the language details to output 
+        if (this.outtype["languageDetails"] === true) {
+            data.push(this.sepline1);
+            data.push(this.csv_format(["language details"]))
+            data.push(this.csv_format(['extension', 'total code', 'total comment', 'total blank', 'percent']));
+            for (let key in total.languages) {
+                let value = total.languages[key];
+                let percent = ((value['code'] / total['code']) * 100).toPrecision(2);
+
+                data.push(this.csv_format([key, value['code'], value['comment'], value['blank'], percent]));
+            }
+            
+            data.push(this.sepline1 + this.eol);
+        }
+
         var items = [];
         items = ['filename', 'code', 'comment', 'blank'];
         data.push(this.csv_format(items));
@@ -606,8 +672,8 @@ export default class LineCount {
         data.push(this.sepline2 + this.eol);
         data.push(this.eol);
 
-       
-        fs.appendFile(filename, data.join(this.eol),(err) => {
+
+        fs.appendFile(filename, data.join(this.eol), (err) => {
             if (err) {
                 this.out.appendLine("count output to csv file fail! " + filename);
             } else {
@@ -615,7 +681,7 @@ export default class LineCount {
             }
         });
 
-        
+
     }
 
     /**
@@ -637,7 +703,7 @@ export default class LineCount {
     private md_table_format(items: any[]) {
         var data = "";
         data = items.join(" | ");
-        data = '|' + data + '|' ;
+        data = '|' + data + '|';
         return data;
     }
 
@@ -649,12 +715,12 @@ export default class LineCount {
         let filename = path.join(this.outpath, this.EXTENSION_NAME + '.md');
         console.log(filename);
 
-         //prepare data
+        //prepare data
         var data = [];
-        data.push("***"+this.eol);
+        data.push("***" + this.eol);
         data.push(this.md_line_format(["EXTENSION NAME", this.EXTENSION_NAME]));
         data.push(this.md_line_format(["EXTENSION VERSION", this.EXTENSION_VERSION]));
-        data.push(this.eol+"***"+this.eol);//md needed
+        data.push(this.eol + "***" + this.eol);//md needed
         data.push(this.md_line_format(["count time", util.getDateTime()]));
         data.push(this.md_line_format(["count workspace", vscode.workspace.rootPath]));
         data.push(this.md_line_format(["total files", this.filelist.length.toString()]));
@@ -662,6 +728,27 @@ export default class LineCount {
         data.push(this.md_line_format(["total comment lines", total['comment']]));
         data.push(this.md_line_format(["total blank lines", total['blank']]));
         data.push(this.eol);
+
+        // write the language details to output 
+        if (this.outtype["languageDetails"] === true) {
+            let languageItems = ['extension', 'total code', 'total comment', 'total blank', 'percent'];
+            data.push(this.md_table_format(languageItems));
+
+            var header = new Array(languageItems.length).join("|----");
+            header = "|----" + header + "|";
+            data.push(header);
+
+            for (let key in total.languages) {
+                let value = total.languages[key];
+                let percent = ((value['code'] / total['code']) * 100).toPrecision(2);
+                data.push(this.md_table_format([key, value['code'], value['comment'], value['blank'], percent]));
+            }
+            
+            data.push("|||||" + this.eol);
+            data.push("***" + this.eol);
+            data.push(this.eol);
+        }
+
 
         var items = [];
         items = ['filename', 'code', 'comment', 'blank'];
@@ -684,13 +771,13 @@ export default class LineCount {
                 }
             }
         }
-        data.push( "|||||" + this.eol);
+        data.push("|||||" + this.eol);
         data.push("***" + this.eol);
         data.push(this.eol);
-       
-        
+
+
         fs.writeFileSync(filename, data.join(this.eol));
-        
+
         this.out.appendLine("count output to file : " + filename);
 
         //do not show file, but preview the markdown
