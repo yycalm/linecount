@@ -38,7 +38,7 @@ export default class LineCount {
         this.EXTENSION_NAME = 'linecount';
         this.EXTENSION_VERSION = '0.1.7';
 
-        let ext = vscode.extensions.getExtension('yycalm.linecount');
+        let ext = vscode.extensions.getExtension('lyzerk.linecounter');
         if (ext !== undefined) {
             this.EXTENSION_NAME = ext.packageJSON.name;
             this.EXTENSION_VERSION = ext.packageJSON.version;
