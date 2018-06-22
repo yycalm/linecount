@@ -23,10 +23,9 @@
     "keywords": [
         "linecount",
         "line",
-        "count",
+        "counter",
         "codeline",
-        "codecount",
-        "counter"
+        "codecount"
     ],
     "engines": {
         "vscode": "^1.5.0"
