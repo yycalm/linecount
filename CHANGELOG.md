@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to the "linecounter" extension will be documented in this file.
 
+## Version 0.1.9 (2018-06-22)
+
+1. Fixing getExtension
+
 
 ## Version 0.1.8 (2018-06-22)
 
