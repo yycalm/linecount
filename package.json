@@ -2,7 +2,7 @@
     "name": "linecounter",
     "displayName": "LineCounter",
     "description": "Count the lines of code.",
-    "version": "0.1.8",
+    "version": "0.1.8.1",
     "publisher": "lyzerk",
     "icon": "images/counticon.png",
     "author": {
